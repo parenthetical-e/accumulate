@@ -122,7 +122,8 @@ class AccumulationExp():
 
 
 	def _d_drift(self,trial,threshold):
-		pass
+		w 
+		for 
 
 
 	def _d_last(self,trial,threshold=1):
@@ -130,7 +131,7 @@ class AccumulationExp():
 		Use only the last exemplar to make the decision on <trial>. 
 		<threshold> is ignored.
 		"""
-		
+
 		return trial[-1],1,0,len(trial)
 
 
