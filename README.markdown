@@ -28,6 +28,7 @@ Let us consider trials with a max length of 4.  This is shorter than you'll want
 
 First create an exhaustive experiment.  AccumulationExp() takes one argument, the max trial length, *l*.
 	
+	l = 4
 	exp1 = accumulate.base.AccumulationExp(l)
 		
 So what do we have?  All possible trial designs live in trials.
@@ -53,7 +54,7 @@ Is....
 	 ('B', 'B', 'B', 'A'),
 	 ('B', 'B', 'B', 'B')]
 
-So first we will assume that the participant makes decisions by counting the number of category A and B examplars, and if that count excceds some threshold (modeled here as a fraction of l) then makes a decision.  
+So first we will assume that the participant makes decisions by counting the number of category A and B examplars, and if that count excceds some threshold (modeled here as a fraction of *l*) then makes a decision.  
 
 First assume they're in hurry and only wait for a 60% threshold.
 
@@ -82,7 +83,7 @@ Each set of paranthesis is
 	
 	(decision, score for that decision, score for the unchosen option, how many exemplars were experienced until decision was made)
 
-'N' trials had no decsion (-1 in these models means None of NA)
+'N' trials had no decsion (-1 in these results means None or NA or 'Does not apply').
 
 Now let us compare that to a more patient ideal participant (who is coincidentally wanting statistical significance).
 
@@ -118,13 +119,15 @@ d_slow is:
 
  2. 'likelihood':  you can think of this as the scantron strategy.  In it we assume the Ss is mostly senstiive to local probability changes. It calculates the probability of the number of As (or Bs) in row.  When the probability excceds threshold, a decision is made. For example:
 
- *p* begins at 0.5.  Assume we had an A to sart. If examplar 2 is A, *p* becomes 0.25.  If examplar 2 is A, *p* is 0.12.  So if the threshold was 0.7 it would the subject would have decided on examplar 2, and it is was 0.8, 3 would have done it. And so on....
+ *p* begins at 0.5.  Assume we had an A to start. If examplar 2 is A, *p* becomes 0.25.  If examplar 2 is A, *p* is 0.12.  So if the threshold was 0.7 it would the subject would have decided on examplar 2, and it is was 0.8, 3 would have done it. And so on....
 
  3. 'bayes' TODO
 
  4. 'drift' is very similar to count, except each examplar's wieght is modulated by a parameter (*w*).  If w = 1, these two are identical.
 
  5. 'last' is the idiot's guess.  It models the case where the Ss waits till the end of the trial the guesses whaever the last examplar was.
+
+ 6. More to come....
 
 # A couple more things, some extras.
 
@@ -151,13 +154,13 @@ Which for l = 4 is:
 	 (1, 3),
 	 (0, 4)]
 
-Finally in on order to asses overall trial difficulty I implemented a function that returns the Hamming Distance (http://en.wikipedia.org/wiki/Hamming_distance) between each trail and the two 'undecidable' trials.
+Finally in on order to asses overall trial difficulty I implemented a function that returns the minimum Hamming Distance (http://en.wikipedia.org/wiki/Hamming_distance) between each trial and the two 'undecidable' trials.
 
 'Undecidable' trials for l = 4 are A,B,A,B and B,A,B,A.
 
-Thus this distance measure allows you to quantify the objective difficulty of the whole trial, where as the lengths until each decision criterion give 'local' (intra-trial) difficulty estimates.
+This distance measure allows you to quantify the objective difficulty of the whole trial, whereas the length until reaching decision criterion gives a 'local' (intra-trial) difficulty estimate.
 
-P.S. 'Undecidable' isn't true for all strategies (e.g. 'last' above), but is the most dificult possible for all strategies.  It is an imperfect term nut still I think a good reference.
+P.S. 'Undecidable' isn't true for all strategies (e.g. 'last' above), but is the most difficult possible for all strategies.  It is an imperfect term but still I think a good reference.
 
 Distance by example (l=4).
 
