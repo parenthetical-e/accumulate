@@ -125,12 +125,21 @@ class AccumulationExp():
 		pass
 
 
+	def _d_last(self,trial,threshold=1):
+		""" 
+		Use only the last exemplar to make the decision on <trial>. 
+		<threshold> is ignored.
+		"""
+		
+		return trial[-1],1,0,len(trial)
+
+
 	def categorize(self,decide='count',threshold=0.5,params=None):
 		""" 
 		Return category decisions, scores and the number of exemplars
 		experienced, using the decision criterion <decide> 
-		('count', 'bayes', 'likelihood', or 'drift') and <threshold> 
-		(0-1).
+		('count', 'bayes', 'likelihood', 'drift', or 'last') and 
+		<threshold> (0-1).
 
 		If the decider requires extra parameters, include them in the 
 		params dictionary, e.g. the drift decider needs a wieght, w,
