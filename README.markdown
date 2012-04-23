@@ -2,11 +2,11 @@ This module allows for simulation and analysis of 2 choice accumulated category 
 
 # Preliminaries
 
-We assume there are two categories, A and B and that there are some (unknown and irrelavant, from the perspective of this model) number of exmplars for each category.  We further assume that the examplars are perfectly identifed as A/B by each participant for every trial and the each A and B is eually wieghted.  These assumptions allow for a full exploration by every subject of the entire A/B space (perhaps in replicate) for trial lengths of l <= 10 (l must be even).  For example, if *l* = 8 there are 256 trials.  If every trial takes 9 seconds, then the whole series can be explored in 38 minutes.
+We assume there are two categories, A and B and that there are some (unknown and irrelevant, from the perspective of this model) number of exemplars for each category.  We further assume that the exemplars are perfectly identified as A/B by each participant and that each A and B is equally weighted.  These assumptions allow for a full exploration by every subject of the entire A/B space (perhaps in replicate) for trial lengths of l <= 10 (l must be even).  For example, if *l* = 8 there are 256 trials.  If every trial takes 9 seconds, then the whole series can be explored in 38 minutes.
 
-By using all trials we can explore the complete consequences of many different category decision models (see 'Decision models').  We can also isolate the most, or least succesful models, of most or least difficult trials for a given stategy(ies) or for each trial holistically (see 'Trial measures'), or even find those key trials where two largely similar models may diverge.
+By using all trials we can explore the complete consequences of many different category decision models (see 'Decision models').  We can also isolate the most, or least successful models, of most or least difficult trials for a given strategy(ies) or for each trial holistically (see 'Trial measures'), or even find those key trials where two largely similar models may diverge.
 
-Simulations are easy.  Subjects are hard.
+Simulations are easy.  Subjects are hard.me
 
 # Introduction
 
@@ -28,7 +28,7 @@ So bring in the module...
 
 Now we can do some work...
 
-Let us consider trials with a max length of 4.  This is shorter than you'll want in practice but allows for easy visualization of the results.  Also, to simplfy implementation *l* must be even.
+Let us consider trials with a max length of 4.  This is shorter than you'll want in practice but allows for easy visualization of the results.  Also, to simplify implementation *l* must be even.
 
 First create an exhaustive experiment.  AccumulationExp() takes one argument, the max trial length, *l*.
 	
@@ -58,7 +58,7 @@ Is....
 	 ('B', 'B', 'B', 'A'),
 	 ('B', 'B', 'B', 'B')]
 
-So first we will assume that the participant makes decisions by counting the number of category A and B examplars, and if that count excceds some threshold (modeled here as a fraction of *l*) then makes a decision.  
+So first we will assume that the participant makes decisions by counting the number of category A and B exemplars, and if that count exceeds some threshold (modeled here as a fraction of *l*) then makes a decision.  
 
 First assume they're in hurry and only wait for a 60% threshold.
 
@@ -87,7 +87,7 @@ Each set of paranthesis is
 	
 	(decision, score for that decision, score for the unchosen option, how many exemplars were experienced until decision was made)
 
-'N' trials had no decsion (-1 in these results means None or NA or 'Does not apply').
+'N' trials had no decision (-1 in these results means None or NA or 'Does not apply').
 
 Now let us compare that to a more patient ideal participant (who is coincidentally wanting statistical significance).
 
@@ -112,7 +112,7 @@ d_slow is:
 	 ('N', -1, -1, -1),
 	 ('B', 1.0, 0.0, 4)]
 
- Bieng so careful they only could reach a decision on the 2 completly A and B trials....
+ Being so careful they only could reach a decision on the 2 completely A and B trials....
 
  
 # Decision models
@@ -121,15 +121,15 @@ d_slow is:
 
  1. 'count' see above
 
- 2. 'likelihood':  you can think of this as the scantron strategy.  In it we assume the Participants is mostly senstiive to local probability changes. It calculates the probability of the number of As (or Bs) in row.  When the probability excceds threshold, a decision is made. For example:
+ 2. 'likelihood':  you can think of this as the scantron strategy.  In it we assume the Participants is mostly sensitive to local probability changes. It calculates the probability of the number of As (or Bs) in row.  When the probability exceeds threshold, a decision is made. For example:
 
- *p* begins at 0.5.  Assume we had an A to start. If examplar 2 is A, *p* becomes 0.25.  If examplar 2 is A, *p* is 0.12.  So if the threshold was 0.7 it would the subject would have decided on examplar 2, and it is was 0.8, 3 would have done it. And so on....
+ *p* begins at 0.5.  Assume we had an A to start. If exemplar 2 is A, *p* becomes 0.25.  If exemplar 2 is A, *p* is 0.12.  So if the threshold was 0.7 it would the subject would have decided on exemplar 2, and it is was 0.8, 3 would have done it. And so on....
 
  3. 'bayes' will implement an Bayesian estimates for A/B.
 
  4. 'drift' will implement a version of Ratcliffe's drift diffusion model
 
- 5. 'last' is the idiot's guess.  It models the case where the Participants waits till the end of the trial the guesses whaever the last examplar was.
+ 5. 'last' is the idiot's guess.  It models the case where the Participants waits till the end of the trial the guesses whatever the last exemplar was.
 
  6. 'first' is the opposite of last.
 
@@ -180,7 +180,7 @@ Smaller numbers mean harder trials; smaller means closer to undecidable.
 
 # Statistics
 
-The accumulate.stats submodule calculates aggregate statistics for AccumulationExp.categorize() results.  Right now it only implements a scores function that returns (M,SD,VAR,N) for A,B and N for score (the value of the selected), off_score (the values for the unchose option) and length (until criterion).
+The accumulate.stats submodule calculates aggregate statistics for AccumulationExp.categorize() results.  Right now it only implements a scores function that returns (M,SD,VAR,N) for A,B and N for score (the value of the selected), off_score (the values for the unchosen option) and length (until criterion).
 
 For example:
 
