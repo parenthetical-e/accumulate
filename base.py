@@ -1,7 +1,8 @@
 import itertools
 
 class AccumulationExp():
-	""" Simulate exhaustive 2 category accumulation designs. """
+	""" Simulate and analyze 2 category accumulation designs. """
+	
 	def __init__(self,l):
 		if (l % 2) == 0:
 			self.l = float(l)
@@ -10,20 +11,20 @@ class AccumulationExp():
 		
 		self.trials = list(
 				itertools.product('AB',repeat=l))
-			## Calculate all possible unqiue combinations 
-			##  for a given trial length.
+			## Calculate all possible unique combinations 
+			## for a given trial length.
 
 
 	def _hamming(self,trial):
 		""" 
-		Return the average hamming distance between the two 'undecidable'
+		Return the minumum hamming distance between the two 'undecidable'
 		trials (e.g. ABAB, BABA when l is 4) and <trial>.
 		"""
 
 		refA = ('A','B') * int(self.l/2)
 		refB = ('B','A') * int(self.l/2)
 
-		# Calc the two Hamming Ds
+		# Calculate the two Hamming Ds
 		dA = 0 
 		dB = 0
 		for ii,t in enumerate(trial):
@@ -37,7 +38,7 @@ class AccumulationExp():
 
 
 	def _count(self,trial):
-		""" Return counts of As and Bs for <trial>. """
+		""" Return a count of As and Bs for <trial>. """
 		cA = 0
 		for t in trial:
 			if t == 'A': 
@@ -49,8 +50,8 @@ class AccumulationExp():
 
 	def _d_count(self,trial,threshold):
 		""" 
-		Return a category (A, B, or N (neutral) for <trial> 
-		based on number of As versus Bs. 
+		Return a category (A, B, or N (neutral)) for <trial> 
+		based on number of As versus Bs.
 	 	"""
 	 	import random
 
@@ -76,8 +77,8 @@ class AccumulationExp():
 
 	def _d_bayes(self,trial,threshold):
 		"""
-		Use Bayesian estimates to make to decide on the category 
-		(based) on <threshold>.  Priors are naive.
+		Use Bayes rule to calculate p(A) and p(B), deciding on the 
+		category when <threshold> is exceeded.
 		"""
 		
 		pA = 0.5
@@ -93,8 +94,8 @@ class AccumulationExp():
 
 	def _d_likelihood(self,trial,threshold):
 		""" 
-		Use the likelihood of the sequence of As of Bs to see if a the 
-		decision threshold is exceeded.
+		Calculate the likelihood of the continuous sequence of either
+		A or B, decide when p_sequence(A) or (B) exceeds <threshold>.
 		"""
 		
 		lastcat = trial[0]
@@ -129,22 +130,22 @@ class AccumulationExp():
 
 	def _d_last(self,trial,threshold=1):
 		""" 
-		Use only the last exemplar to make the decision on <trial>. 
-		<threshold> is ignored.
+		Use the last exemplar to make the decision on <trial>. 
+		<threshold> is ignored (but is included to keep the 
+		signature consistent).
 		"""
-
 		return trial[-1],1,0,len(trial)
 
 
 	def categorize(self,decide='count',threshold=0.5,params=None):
 		""" 
-		Return category decisions, scores and the number of exemplars
-		experienced, using the decision criterion <decide> 
-		('count', 'bayes', 'likelihood', 'drift', or 'last') and 
-		<threshold> (0-1).
+		Return category decisions, scores for both the chosen and 
+		the not, the number of exemplars experienced, using the 
+		decision criterion <decide> ('count', 'bayes', 'likelihood', 
+		'drift', or 'last') and <threshold> (0-1).
 
 		If the decider requires extra parameters, include them in the 
-		params dictionary, e.g. the drift decider needs a wieght, w,
+		params dictionary, e.g. the drift decider needs a weight, w,
 		so params would be {'w':0.25} if w was 0.25. 
 		"""
 
@@ -159,10 +160,11 @@ class AccumulationExp():
 
 	def distances(self):
 		""" 
-		Return the minumum hamming distance between the two 'undecidable'
-		trials types (e.g. ABAB, BABA when l is 4).  
+		Return the minimum Hamming Distance between the two 
+		'undecidable' trials types (e.g. ABAB, BABA when l is 4).  
 
-		This may be used an objetive measure of trial difficulty.  
+		This may be used an objective measure of trial difficulty.  
+		
 		Low scores suggest greater difficulty.
 		"""
 
@@ -180,5 +182,5 @@ class FractionAccumalationExp(AccumulationExp):
 		AccumulationExp.__init__()
 
 	pass
-	# TODO overide self.trial # Rmoeving those whose counts (for either A or B)
-	# are below fracion
+	# TODO override self.trial # Removing those whose counts 
+	# (for either A or B) are below fraction.
