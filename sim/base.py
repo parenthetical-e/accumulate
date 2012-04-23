@@ -190,7 +190,7 @@ class AccumulationExp():
 
 
 class FractionAccumalationExp(AccumulationExp):
-	def __init__(fraction):
+	def __init__(self,fraction):
 		AccumulationExp.__init__()
 
 	pass

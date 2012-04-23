@@ -33,7 +33,7 @@ Let us consider trials with a max length of 4.  This is shorter than you'll want
 First create an exhaustive experiment.  AccumulationExp() takes one argument, the max trial length, *l*.
 	
 	l = 4
-	exp1 = accumulate.base.AccumulationExp(l)
+	exp1 = accumulate.sim.base.AccumulationExp(l)
 		
 So what do we have?  All possible trial designs live in trials.
 
