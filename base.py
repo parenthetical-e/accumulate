@@ -49,13 +49,14 @@ class AccumulationExp():
 
 
 	def _d_meta(trial,threshold):
-		# TODO: use all sensible algs to produce n average p(A) and (B)
+		# TODO: use all sensible algs to produce an average 
+		# p(A) and (B),
 		# deciding with that average.
+		#
 		# It would be lovely if this was better than the rest 
 		# and the best fit 
-		# for actual Ss performance.
+		# for actual Ss performance. Hope for neat outcomes.
 
-		# Hope.
 		pass
 
 
