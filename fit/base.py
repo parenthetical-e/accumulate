@@ -1,4 +1,4 @@
-""" A subclass for fitting of category decision models to behavoiral data. """
+""" A subclass for fitting category decision models to behavioral data. """
 from accumulate.sim.base import AccumulationExp
 
 class AccumulateModelFit(AccumulationExp):
