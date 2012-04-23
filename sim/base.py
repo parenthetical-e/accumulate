@@ -1,5 +1,6 @@
 import itertools
 
+
 class AccumulationExp():
 	""" Simulate and analyze 2 category accumulation designs. """
 	
@@ -187,6 +188,46 @@ class AccumulationExp():
 		"""  Return the number of As and Bs. """
 		
 		return [self._count(trial) for trial in self.trials]
+
+
+	def write_trials(self,encoding=None):
+		""" Write out trials, each row is a trial.  
+
+		If <encoding> is a list of length 2 the first entry will be used to 
+		encode 'A' the second for 'B'.
+		"""
+		import csv
+
+		# Re-encode... if not None
+		# and of length 2
+		en_trials = []
+		if encoding != None:
+			if len(encoding) == 2:
+				# Loop over trials and each element,
+				# appending the re-encoded elements.
+				for trial in self.trials:
+					en_t = []
+					for t in trial:
+						if t == 'A':
+							en_t.append(encoding[0])
+						else:
+							en_t.append(encoding[1])
+					en_trials.append(tuple(en_t))
+						## converting to tuples so it is 
+						## identical in format to self.trials
+						## thought I doubt this will ever matter.
+			else:
+				raise ValueError('Encoding can only have two entries')
+		else:
+			# Just assign...
+			en_trials = self.trials
+
+		# Write it out...
+		f = open(str(int(self.l)) + 'trials.dat', 'wb')
+		w = csv.writer(f, delimiter='\t')
+		w.writerows(en_trials)
+		f.flush()
+		f.close()
 
 
 class FractionAccumalationExp(AccumulationExp):
