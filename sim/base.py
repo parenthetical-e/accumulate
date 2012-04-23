@@ -7,7 +7,7 @@ class AccumulationExp():
 		if (l % 2) == 0:
 			self.l = float(l)
 		else:
-			raise ValueError('l must be an even integer.')
+			raise ValueError('l must be even.')
 		
 		self.trials = list(
 				itertools.product('AB',repeat=l))
