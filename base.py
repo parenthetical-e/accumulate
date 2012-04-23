@@ -88,6 +88,7 @@ class AccumulationExp():
 		pX_A = 0.5
 		pX_B = 0.5
 		pass
+		# TODO
 
 
 	def _d_likelihood(self,trial,threshold):
@@ -122,8 +123,8 @@ class AccumulationExp():
 
 
 	def _d_drift(self,trial,threshold):
-		w 
-		for 
+		pass 
+		# TODO
 
 
 	def _d_last(self,trial,threshold=1):

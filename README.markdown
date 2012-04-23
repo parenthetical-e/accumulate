@@ -175,3 +175,28 @@ Gave
 	[2, 1, 1, 2, 1, 0, 2, 1, 1, 2, 0, 1, 2, 1, 1, 2]
 
 Smaller numbers mean harder trials; smaller means closer to undecidable.
+
+# Statistics
+
+The stats submodule calculate aggregate statistics for AccumulationExp.categorize() results.  Right now it only implements a scores function that returns M,SC,VAR,N for A,B and N. For example:
+
+	result1 = exp1.categorize('likelihood',0.7)
+	stats1 = accumulate.stats.scores(result1)
+
+To see the stats
+
+	stats1.items()
+
+	[('A',
+	  {'length': (2.5714285714285716, 0.53061224489795922, 0.72843135908468359, 7),
+	   'off_score': (0.5, 0.0, 0.0, 7),
+	   'score': (0.75, 0.0, 0.0, 7)}),
+	 ('B',
+	  {'length': (2.5714285714285716, 0.53061224489795922, 0.72843135908468359, 7),
+	   'off_score': (0.5, 0.0, 0.0, 7),
+	   'score': (0.75, 0.0, 0.0, 7)}),
+	 ('N',
+	  {'length': (-1.0, 0.0, 0.0, 2),
+	   'off_score': (-1.0, 0.0, 0.0, 2),
+	   'score': (-1.0, 0.0, 0.0, 2)})]
+
