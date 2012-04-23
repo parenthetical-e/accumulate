@@ -22,10 +22,12 @@ class AccumulationExp():
 		trials (e.g. ABAB, BABA when l is 4) and <trial>.
 		"""
 
+		# Create the two undecidable trials
 		refA = ('A','B') * int(self.l/2)
 		refB = ('B','A') * int(self.l/2)
 
-		# Calculate the two Hamming Ds
+		# Calculate the 
+		# two Hamming Ds
 		dA = 0 
 		dB = 0
 		for ii,t in enumerate(trial):
@@ -35,6 +37,8 @@ class AccumulationExp():
 			if t != refB[ii]:
 				dB += 1
 
+		# Return the smallest 
+		# of the two Ds
 		return min(dA, dB)
 
 
@@ -150,6 +154,15 @@ class AccumulationExp():
 		return trial[-1],1,0,len(trial)
 
 
+	def _d_first(self,trial,threshold=1):
+		""" 
+		Use the first exemplar to make the decision on <trial>. 
+		<threshold> is ignored (but is included to keep the 
+		signature consistent).
+		"""
+		return trial[0],1,0,len(trial)
+
+
 	def categorize(self,decide='count',threshold=0.5,params=None):
 		""" 
 		Return category decisions, scores for both the chosen and 
@@ -191,7 +204,8 @@ class AccumulationExp():
 
 
 	def write_trials(self,encoding=None):
-		""" Write out trials, each row is a trial.  
+		""" 
+		Write out trials, each row is a trial.  
 
 		If <encoding> is a list of length 2 the first entry will be used to 
 		encode 'A' the second for 'B'.
@@ -217,9 +231,9 @@ class AccumulationExp():
 						## identical in format to self.trials
 						## thought I doubt this will ever matter.
 			else:
-				raise ValueError('Encoding can only have two entries')
+				raise ValueError('<encoding> can only have two entries.')
 		else:
-			# Just assign...
+			# Assign if encoding was None.
 			en_trials = self.trials
 
 		# Write it out...

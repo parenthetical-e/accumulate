@@ -2,7 +2,7 @@ This module allows for simulation and analysis of 2 choice accumulated category 
 
 # Preliminaries
 
-We assume there are two categories, A and B and that there are some (unknown and irrelavant, from the perspective of this model) number of exmplars for each category.  We further assume that the examplars are perfectly identifed as A/B by each participant for every trial.  These assumptions allow for a full exploration by every subject of the entire A,B space (perhaps in replicate) for trial lengths of l < 12 (l must be even).  For example if l = 10, there are 1024 trials.  If every trial takes 3 seconds, then the whole series can be explored in 51 minutes.  
+We assume there are two categories, A and B and that there are some (unknown and irrelavant, from the perspective of this model) number of exmplars for each category.  We further assume that the examplars are perfectly identifed as A/B by each participant for every trial and the each A and B is eually wieghted.  These assumptions allow for a full exploration by every subject of the entire A/B space (perhaps in replicate) for trial lengths of l <= 10 (l must be even).  For example, if *l* = 8 there are 256 trials.  If every trial takes 9 seconds, then the whole series can be explored in 38 minutes.
 
 By using all trials we can explore the complete consequences of many different category decision models (see 'Decision models').  We can also isolate the most, or least succesful models, of most or least difficult trials for a given stategy(ies) or for each trial holistically (see 'Trial measures'), or even find those key trials where two largely similar models may diverge.
 
@@ -131,7 +131,9 @@ d_slow is:
 
  5. 'last' is the idiot's guess.  It models the case where the Participants waits till the end of the trial the guesses whaever the last examplar was.
 
- 6. More to come....
+ 6. 'first' is the opposite of last.
+
+ 7. More to come....
 
 # Trial measures.
 
