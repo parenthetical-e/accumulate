@@ -48,6 +48,17 @@ class AccumulationExp():
 		return cA, (int(self.l) - cA)
 
 
+	def _d_meta(trial,threshold):
+		# TODO: use all sensible algs to produce n average p(A) and (B)
+		# deciding with that average.
+		# It would be lovely if this was better than the rest 
+		# and the best fit 
+		# for actual Ss performance.
+
+		# Hope.
+		pass
+
+
 	def _d_count(self,trial,threshold):
 		""" 
 		Return a category (A, B, or N (neutral)) for <trial> 
@@ -93,7 +104,7 @@ class AccumulationExp():
 
 
 	def _d_likelihood(self,trial,threshold):
-		""" 
+		"""
 		Calculate the likelihood of the continuous sequence of either
 		A or B, decide when p_sequence(A) or (B) exceeds <threshold>.
 		"""
