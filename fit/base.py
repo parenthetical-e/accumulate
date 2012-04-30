@@ -1,7 +1,7 @@
 """ A subclass for fitting category decision models to behavioral data. """
-from accumulate.sim.base import AccumulationExp
+from accumulate.sim.base import Exp
 
-class AccumulateModelFit(AccumulationExp):
+class FitExp(Exp):
 	def __init__(self):
 		AccumulationExp.__init__(self)
 

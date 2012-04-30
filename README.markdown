@@ -12,8 +12,7 @@ Simulations are easy.  Subjects are hard.
 
 There is one possible experimental design.
 
-	AccumulationExp()
-
+	Exp()
 
 It  simulates all possible designs of length *l*, under a variety of category decision criteria (below).
 

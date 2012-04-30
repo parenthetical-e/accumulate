@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 
 
-class AccumulationExp():
+class Exp():
 	""" Simulate and analyze 2 category accumulation designs. """
 	
 	def __init__(self,l):
@@ -165,8 +165,6 @@ class AccumulationExp():
 			else:
 				H_b +=  -0.5 * np.log2(0.5)
 
-			print H_a
-			print H_b
 			if (H_a * info_scale) >= threshold:
 				return 'A', H_a, H_b, ii+1
 			elif (H_b * info_scale) >= threshold:
@@ -214,7 +212,7 @@ class AccumulationExp():
 		"""
 
 		# Threshold is valid?
-		if threshold > 1 or threshold < 0:
+		if threshold >= 1 or threshold <= 0:
 			raise ValueError('<threshold> must be between 0 - 1.')
 
 		# OK. Run the decider (of form self._d_*)
@@ -244,6 +242,26 @@ class AccumulationExp():
 		"""  Return the number of As and Bs. """
 		
 		return [self._count(trial) for trial in self.trials]
+
+
+	def correct(self):
+		""" 
+		Return the right answer if the particiapnt always waited 
+		to the end and only counted.  This (it is assumed) is the 
+		most accurate strategy.
+		"""
+
+		cs = self.counts()
+		corr = []
+		for c in cs:
+			if c[0] > c[1]:
+				corr.append('A')
+			elif c[0] < c[1]:
+				corr.append('B')
+			else:
+				corr.append('N')
+
+		return corr
 
 
 	def write_trials(self,encoding=None):
