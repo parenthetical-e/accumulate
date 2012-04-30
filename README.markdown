@@ -6,7 +6,7 @@ We assume there are two categories, A and B and that there are some (unknown and
 
 By using all trials we can explore the complete consequences of many different category decision models (see 'Decision models').  We can also isolate the most, or least successful models, of most or least difficult trials for a given strategy(ies) or for each trial holistically (see 'Trial measures'), or even find those key trials where two largely similar models may diverge.
 
-Simulations are easy.  Subjects are hard.me
+Simulations are easy.  Subjects are hard.
 
 # Introduction
 
@@ -117,7 +117,7 @@ d_slow is:
  
 # Decision models
 
- The other decision models are 'likelihood', 'bayes', 'drift', 'last', and 'drift'.
+ The other decision models are 'likelihood', 'bayes', 'drift', 'last', 'first', and 'drift'.
 
  1. 'count' see above
 

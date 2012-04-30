@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 
 
 class AccumulationExp():
@@ -112,7 +113,8 @@ class AccumulationExp():
 	def _d_likelihood(self,trial,threshold):
 		"""
 		Calculate the likelihood of the continuous sequence of either
-		A or B, decide when p_sequence(A) or (B) exceeds <threshold>.
+		A or B in <trial>, decide when p_sequence(A) or (B) 
+		exceeds <threshold>.
 		"""
 		
 		lastcat = trial[0]
@@ -140,12 +142,48 @@ class AccumulationExp():
 		return 'N', -1, -1, -1
 
 
+	def _d_information(self,trial,threshold):
+		""" 
+		Incrementally calculate the binary entropy of the sequence 
+		of As and Bs in <trial>, decide when H(A) or H(B) exceeds 
+		<threshold>.
+		"""
+
+		# For fullset of self.trials the p(A) and p(B)
+		# at each postion of given trial is 0.5.
+		# so  H(A) = sum(0.5*log_2_i(0.5)), where i 
+		# the nuber of As.  H(B) is the same except 
+		# indexing by j, the number of bs.
+		H_a = 0
+		H_b = 0
+
+		info_scale = np.log2(self.l)/self.l
+
+		for ii,t in enumerate(trial):
+			if t == 'A':
+				H_a +=  -0.5 * np.log2(0.5)
+			else:
+				H_b +=  -0.5 * np.log2(0.5)
+
+			print H_a
+			print H_b
+			if (H_a * info_scale) >= threshold:
+				return 'A', H_a, H_b, ii+1
+			elif (H_b * info_scale) >= threshold:
+				return 'B', H_b, H_a, ii+1
+
+		# If threshold is never met,
+		# we end up here...
+		# this is a neutral trial.
+		return 'N', -1, -1, -1
+
+
 	def _d_drift(self,trial,threshold):
 		pass 
 		# TODO
 
 
-	def _d_last(self,trial,threshold=1):
+	def _d_last(self,trial,threshold):
 		""" 
 		Use the last exemplar to make the decision on <trial>. 
 		<threshold> is ignored (but is included to keep the 
@@ -154,7 +192,7 @@ class AccumulationExp():
 		return trial[-1],1,0,len(trial)
 
 
-	def _d_first(self,trial,threshold=1):
+	def _d_first(self,trial,threshold):
 		""" 
 		Use the first exemplar to make the decision on <trial>. 
 		<threshold> is ignored (but is included to keep the 
@@ -175,6 +213,11 @@ class AccumulationExp():
 		so params would be {'w':0.25} if w was 0.25. 
 		"""
 
+		# Threshold is valid?
+		if threshold > 1 or threshold < 0:
+			raise ValueError('<threshold> must be between 0 - 1.')
+
+		# OK. Run the decider (of form self._d_*)
 		decider = getattr(self,'_d_' + decide)
 		if params == None:
 			d = [decider(trial,threshold) for trial in self.trials]
