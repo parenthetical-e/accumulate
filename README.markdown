@@ -10,15 +10,12 @@ Simulations are easy.  Subjects are hard.
 
 # Introduction
 
-There are two possible experimental design classes.
+There is one possible experimental design.
 
 	AccumulationExp()
 
-and 
-	
-	FractionAccumalationExp()
 
-The first simulates all possible designs of length *l*, under a variety of category decision criteria (below).  The second simulates only those trials whose fraction of As or Bs exceeds some given threshold.  Other than this difference though each has the same methods and capabilities.
+It  simulates all possible designs of length *l*, under a variety of category decision criteria (below).
 
 # A simple use case (run inside ipython):
 

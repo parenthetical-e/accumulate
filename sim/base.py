@@ -286,11 +286,3 @@ class AccumulationExp():
 		f.flush()
 		f.close()
 
-
-class FractionAccumalationExp(AccumulationExp):
-	def __init__(self,fraction):
-		AccumulationExp.__init__()
-
-	pass
-	# TODO override self.trial # Removing those whose counts 
-	# (for either A or B) are below fraction.
