@@ -149,22 +149,22 @@ class Exp():
 		<threshold>.
 		"""
 
-		# For fullset of self.trials the p(A) and p(B)
-		# at each postion of given trial is 0.5.
-		# so  H(A) = sum(0.5*log_2_i(0.5)), where i 
-		# the nuber of As.  H(B) is the same except 
-		# indexing by j, the number of bs.
 		H_a = 0
 		H_b = 0
-
 		info_scale = np.log2(self.l)/self.l
 
 		for ii,t in enumerate(trial):
 			if t == 'A':
 				H_a +=  -0.5 * np.log2(0.5)
+					## For a binary alphabet, b-ary entropy is
+					## H(A) = sum_ii(b*log_2(b))
+					## where b is the probability a letter
+					## in the alphabet
+					## appears at slot ii (i.e. t above).
+					## In this case b = p(A) = 0.5 for all ii.
 			else:
 				H_b +=  -0.5 * np.log2(0.5)
-
+					## b = p(B) = 0.5.
 			if (H_a * info_scale) >= threshold:
 				return 'A', H_a, H_b, ii+1
 			elif (H_b * info_scale) >= threshold:
@@ -218,11 +218,9 @@ class Exp():
 		# OK. Run the decider (of form self._d_*)
 		decider = getattr(self,'_d_' + decide)
 		if params == None:
-			d = [decider(trial,threshold) for trial in self.trials]
+			return [decider(trial,threshold) for trial in self.trials]
 		else:
-			d = [decider(trial,threshold,**params) for trial in self.trials]
-
-		return d
+			return [decider(trial,threshold,**params) for trial in self.trials]
 
 
 	def distances(self):
