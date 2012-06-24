@@ -8,14 +8,6 @@ By using all trials we can explore the complete consequences of many different c
 
 Simulations are easy.  Subjects are hard.
 
-# Introduction
-
-There is one possible experimental design.
-
-	Exp()
-
-It  simulates all possible designs of length *l*, under a variety of category decision criteria (below).
-
 # A simple use case (run inside ipython):
 
 So bring in the module...
@@ -79,7 +71,7 @@ d_fast is:
 	 ('B', 0.75, 0.0, 3),
 	 ('B', 0.75, 0.0, 3)]
 
-Each set of paranthesis is 
+Each set of parenthesis is 
 	
 	(decision, score for that decision, score for the unchosen option, how many exemplars were experienced until decision was made)
 
