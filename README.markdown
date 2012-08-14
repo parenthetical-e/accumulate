@@ -2,7 +2,7 @@ This module allows for simulation and analysis of 2 choice accumulated category 
 
 # Preliminaries
 
-We assume there are two categories, A and B and that there are some (unknown and irrelevant, from the perspective of this model) number of exemplars for each category.  We further assume that the exemplars are perfectly identified as A/B by each participant and that each A and B is equally weighted.  These assumptions allow for a full exploration by every subject of the entire A/B space (perhaps in replicate) for trial lengths of l <= 10 (l must be even).  For example, if *l* = 8 there are 256 trials.  If every trial takes 9 seconds, then the whole series can be explored in 38 minutes.
+We assume there are two categories, A and B and that there are some (unknown and irrelevant, from the perspective of this model) number of exemplars for each category.  We further assume that the exemplars are perfectly identified as A/B by each participant and that each A and B is equally weighted.  These assumptions allow for a full exploration by every subject of the entire A/B space (perhaps in replicate) for trial lengths of l = 10 (l must be even).  For example, if *l* = 8 there are 256 trials.  If every trial takes 9 seconds, then the whole series can be explored in 38 minutes.
 
 By using all trials we can explore the complete consequences of many different category decision models (see 'Decision models').  We can also isolate the most, or least successful models, of most or least difficult trials for a given strategy(ies) or for each trial holistically (see 'Trial measures'), or even find those key trials where two largely similar models may diverge.
 
@@ -37,7 +37,7 @@ Is....
 	 ('A', 'B', 'A', 'B'),
 	 ('A', 'B', 'B', 'A'),
 	 ('A', 'B', 'B', 'B'),
-	 ('B', 'A', 'A', 'A'),
+	 ('B', 'A`', 'A', 'A'),
 	 ('B', 'A', 'A', 'B'),
 	 ('B', 'A', 'B', 'A'),
 	 ('B', 'A', 'B', 'B'),
