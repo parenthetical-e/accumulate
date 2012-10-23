@@ -1,0 +1,15 @@
+* ...Rest of models
+    - Bayes, Drift, logLR, and urgency gating
+* Trial level (ranked/sorted) visualization
+* visualization for the correct and rt diff as well
+* Not worth it?; Parallelization for categorization of long sequences; multiprocessing -- go.
+    Create a new method categorization_batch, adding a batch/core number arg
+
+* Create way to visualize theoretical HRFs (both individual/trial-level and average) for each model.  This might be a surprise, or at least of use.  From this view some models will certainly conflict with the Wheeler 3 signal paradigm.
+
+* How to sample trials with many many points; it is to massive to due exhaustively....  
+
+* What is my p() distribution for these trials and how do I sample it effectively?.  A very large discrete, two states, many slots.
+    - Random would work, but for l=250 that is huge, 
+    - Or I could randomly permute for each hamming distance once for every sampling iteration, ensuring coverage, but perhaps biasing? 
+    - Perhaps sample instead by hamming but weighting the sampling depending on the distribution of hamming Ds; how do I find those!?
