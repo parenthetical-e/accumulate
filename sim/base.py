@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 from accumulate import models
 
-class Exp():
+class Trials():
     """ Simulate and analyze 2 category accumulation designs. """
     
     def __init__(self, l):
@@ -16,6 +16,13 @@ class Exp():
         self.trial_count = 0
         self.trials = self._generate_trials()
         self.max_trial_count = (2 ** int(l))/2
+            ## self.max_trial_count is used to stop self.trials 
+            ## iterations.
+            ## 
+            ## We only want to iterate over the first half of trials
+            ## as the second half is the first half's reflection.
+            ## Examining the second half would double the needed
+            ## computatioans while adding no useful information.
 
 
     def _generate_trials(self):
@@ -38,8 +45,7 @@ class Exp():
         refA = 'AB' * int(self.l / 2)
         refB = 'BA' * int(self.l / 2)
 
-        # Calculate the 
-        # two Hamming Ds
+        # Calculate the two Hamming Ds
         dA = 0 
         dB = 0
         for ii,t in enumerate(trial):
@@ -56,6 +62,8 @@ class Exp():
 
     def _count(self, trial):
         """ Return a count of As and Bs for <trial>. """
+        
+        # cA is the number of As
         cA = 0
         for t in trial:
             if t == 'A': 
@@ -73,7 +81,7 @@ class Exp():
         self.trials = self._generate_trials()
         
 
-    def categorize(self, model_names=None, threshold=0.5, params=None):
+    def categorize(self, models, threshold=0.5):
         """ Return category decisions, scores for both the chosen and 
         the not, the number of exemplars experienced, using the 
         decision criterion <decide> ('count', 'bayes', 'likelihood', 
@@ -87,19 +95,22 @@ class Exp():
         if threshold >= 1 or threshold <= 0:
             raise ValueError('<threshold> must be between 0 - 1.')
 
-        # OK. Run the models
+        # OK. Run the models.
         model_results = defaultdict(dict)
-        for name in model_names:
+        for decider in models:
             while self.trial_count < self.max_trial_count:
                 trial = ''.join(self.trials.next())
 
-                # Make a decision, using models
-                decider = getattr(models, name)
-                decision = decider(self, trial, threshold, **params)
-
+                # Make a decision
+                decision = decider(trial, threshold)
+                    ## If the decider needs parameters construct
+                    ## via closure, see the code 
+                    ## accumulate.models.construct for details
 
                 # Then store it in the (2) nested dict, model_results    
-                model_results[trial][name] = decision
+                model_results[trial][decider.__name__] = decision
+                
+                # Update the stop counter
                 self.trial_count += 1
 
             # For the next model, refresh trials.
@@ -118,8 +129,14 @@ class Exp():
         Low scores suggest greater difficulty.
         """
 
-        # Calc the distances an reset trials
-        dist = [self._hamming(trial) for trial in self.trials]
+        # Calc the and return (in a dict) the distances.
+        dist = dict()
+        for ii, trial in enumerate(self.trials):
+            if ii < self.max_trial_count:
+                dist[''.join(trial)] = self._hamming(trial)
+            else:
+                break
+            
         self.trials = self._generate_trials()
 
         return dist
@@ -128,9 +145,15 @@ class Exp():
     def counts(self):
         """  Return the number of As and Bs. """
             
-        # Calc the cnts then reset trials
-        cnts = [self._count(trial) for trial in self.trials]
-        self.trials =self. _generate_trials()
+        # Return the A/B counts in a dict
+        cnts = dict()
+        for ii, trial in enumerate(self.trials):
+            if ii < self.max_trial_count:
+                cnts[''.join(trial)] = self._count(trial)
+            else:
+                break
+            
+        self.trials =self._generate_trials()
 
         return cnts 
 
@@ -149,17 +172,20 @@ class Exp():
             if len(encoding) == 2:
                 # Loop over trials and each element,
                 # appending the re-encoded elements.
-                for trial in self.trials:
-                    en_t = []
-                    for t in trial:
-                        if t == 'A':
-                            en_t.append(encoding[0])
-                        else:
-                            en_t.append(encoding[1])
-                    en_trials.append(tuple(en_t))
-                        ## converting to tuples so it is 
-                        ## identical in format to self.trials
-                        ## thought I doubt this will ever matter.
+                for ii, trial in enumerate(self.trials):
+                    if ii < self.max_trial_count:
+                        en_t = []
+                        for t in trial:
+                            if t == 'A':
+                                en_t.append(encoding[0])
+                            else:
+                                en_t.append(encoding[1])
+                        en_trials.append(tuple(en_t))
+                            ## converting to tuples so it is 
+                            ## identical in format to self.trials
+                            ## thought I doubt this will ever matter.
+                    else:
+                        break
             else:
                 raise ValueError('<encoding> can only have two entries.')
         else:

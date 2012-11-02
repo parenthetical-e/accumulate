@@ -12,6 +12,17 @@
 import numpy as np
 
 
+def _create_d_result(decision, chosen_score, unchosen_score, rt):
+    """ Converts the decision data to a dictionary. """
+    
+    return {
+        'decision' : decision,
+        'chosen_score' : chosen_score,
+        'unchosen_score' : unchosen_score,
+        'rt' : rt
+    }
+
+
 def _decider(score_A, score_B, threshold, trial_counter):
     """ Decide between the (normalized) scores based on <threshold>. 
     This is just a helper function, it is not always used. 
@@ -26,11 +37,11 @@ def _decider(score_A, score_B, threshold, trial_counter):
         # however if they are the same,
         # return neutral
         if score_A > score_B:
-            return 'A', score_A, score_B, trial_counter
+            return _create_d_result('A', score_A, score_B, trial_counter)
         elif score_A < score_B:
-            return 'B', score_B, score_A, trial_counter
+            return _create_d_result('B', score_B, score_A, trial_counter)
         elif score_A == score_B:
-            return 'N', score_A, score_B, trial_counter
+            return _create_d_result('N', score_A, score_B, trial_counter)
                 ## It is unlikely that this case will
                 ## ever occur however I feel it is 
                 ## better to deal with this case explictly
@@ -45,12 +56,11 @@ def _decider(score_A, score_B, threshold, trial_counter):
         return None
 
 
-def count(self, trial, threshold, **params):
+def abscount(trial, threshold):
     """ Return a category (A, B, or N (neutral)) for <trial> 
     based on number of As versus Bs. """
     import random
     
-    cat = 'N'
     score_A = 0
     score_B = 0
     l = float(len(trial))
@@ -73,11 +83,150 @@ def count(self, trial, threshold, **params):
     else:
         # If threshold is never met,
         # we end up here...
-        return 'N', None, None, None
+        return _create_d_result('N', None, None, None)
 
+
+def relcount(trial, threshold):
+    """ Return a category (A, B, or N (neutral)) for <trial> 
+    based on proportion of As to Bs. """
+    
+    cA = 0.0
+    cB = 0.0
+    for ii, t in enumerate(trial):
+        # Update scores based on t
+        if t == 'A':
+            cA += 1
+        else:
+            cB += 1
+        
+        if (cA > 0) and (cB > 0):
+            score_A = cA / (cA + cB)
+            score_B = 1 - score_A
+
+            # And see if a decision can be made
+            decision = _decider(score_A, score_B, threshold, ii+1)
+            if decision != None:
+                return decision
+        else:
+            continue
+    else:
+        # If threshold is never met,
+        # we end up here...
+        return _create_d_result('N', None, None, None)
+    
+      
+def naive_probability(trial, threshold):
+    """ Calculate the likelihood of the continuous sequence of either
+    A or B in <trial>, decide when p_sequence(A) or (B) exceeds <threshold>. """
+    
+    lastcat = trial[0]
+    p = 0.5
+        ## Init
+
+    for ii,t in enumerate(trial[1:]):
+        if t == lastcat:
+            # If t is the same, 
+            # decrease the likelihood (p).
+            p = p * 0.5
+
+            # Test threshold
+            score = 1 - p
+            if score >= threshold:
+                return _create_d_result(lastcat, score, 0.5, ii+2)
+        else:
+            # Otherwise reset
+            lastcat = t
+            p = 0.5
+
+    # If threshold is never met,
+    # we end up here...
+    # this is a neutral trial.
+    return _create_d_result('N', None, None, None)
+
+
+def information(trial, threshold):
+    """ Incrementally calculate the binary entropy of the sequence 
+    of As and Bs in <trial>, decide when H(A) or H(B) exceeds 
+    <threshold>. """
+
+    H_a = 0
+    H_b = 0
+    l = float(len(trial))
+    norm_const = np.log2(l) / l
+    for ii,t in enumerate(trial):
+        if t == 'A':
+            H_a +=  -0.5 * np.log2(0.5)
+                ## For a binary alphabet, b-ary entropy is
+                ## H(A) = sum_i(b*log_2(b))
+                ## where b is the probability a letter
+                ## in the alphabet
+                ## appears at slot i (i.e. = t above).
+                ## In this case b = p(A) = p(b) = 0.5 for all i.
+        else:
+            H_b +=  -0.5 * np.log2(0.5)
+
+        # And see if a decision can be made
+        decision = _decider(H_a * norm_const, 
+                H_b * norm_const, threshold, ii+1)
+        if decision != None:
+            return decision
+    else:
+        # If threshold is never met,
+        # we end up here...
+        return _create_d_result('N', None, None, None)
+
+
+# TODO: test me
+def likelihood_ratio(trial, threshold):
+    """ Use a version of the sequential ratio test to decide (log_10). """
+     
+    from math import log, fabs
+    
+    # Transform threshold to suitable deciban
+    # equivilant.
+    dthreshold = threshold * 2.0
+        ## 2 decibans is 99% confidence,
+        ## so use that to map threshold (0-1)
+        ## to the deciban threshold (dthreshold).
+
+    cA = 0.0
+    cB = 0.0
+    logLR = 0.0
+    l = float(len(trial))
+    for ii,t in enumerate(trial):
+        if t == 'A':
+            cA += 1
+        else:
+            cB += 1
+        
+        if (cA > 0) and (cB > 0):
+            logLR += log(cA/cB, 10)
+        else:
+            continue
+            ## This implementaion can't decide on all
+            ## A or B trials.  Live with this edge case for now?
+        
+        # A custom decision function
+        # was necessary:
+        if fabs(logLR) >= dthreshold:
+            if logLR > 0:
+                return _create_d_result('A', logLR, 0, ii+1)
+            elif logLR < 0:
+                return _create_d_result('B', logLR, 0, ii+1)
+            elif logLR == 0:
+                return _create_d_result('N', logLR, 0, ii+1)
+            else:
+                # It should be impossible to get here, however
+                # just in case something very odd happens....
+                raise ValueError("Something is very wrong with the scores.")
+    else:
+       # If threshold is never met,
+       # we end up here...
+       return _create_d_result('N', None, None, None)
+    
 
 # TODO: I is borken, do not use.
-# def bayes(self, trial, threshold, **params):
+# def bayes(trial, threshold, **params):
 #     """ Use Bayes rule to calculate p(A) and p(B), deciding on the 
 #     category when <threshold> is exceeded. """
 #     from copy import deepcopy
@@ -121,133 +270,4 @@ def count(self, trial, threshold, **params):
 #     else:
 #         # If threshold is never met,
 #         # we end up here...
-#         return 'N', None, None, None
-
-
-def naive_probability(self, trial, threshold, **params):
-    """ Calculate the likelihood of the continuous sequence of either
-    A or B in <trial>, decide when p_sequence(A) or (B) exceeds <threshold>. """
-    
-    lastcat = trial[0]
-    p = 0.5
-        ## Init
-
-    for ii,t in enumerate(trial[1:]):
-        if t == lastcat:
-            # If t is the same, 
-            # decrease the likelihood (p).
-            p = p * 0.5
-
-            # Test threshold
-            score = 1 - p
-            if score >= threshold:
-                return lastcat, score, 0.5, ii+2
-        else:
-            # Otherwise reset
-            lastcat = t
-            p = 0.5
-
-    # If threshold is never met,
-    # we end up here...
-    # this is a neutral trial.
-    return 'N', None, None, None
-
-
-def information(self, trial, threshold, **params):
-    """ Incrementally calculate the binary entropy of the sequence 
-    of As and Bs in <trial>, decide when H(A) or H(B) exceeds 
-    <threshold>. """
-
-    H_a = 0
-    H_b = 0
-    norm_const = np.log2(self.l) / self.l
-    for ii,t in enumerate(trial):
-        if t == 'A':
-            H_a +=  -0.5 * np.log2(0.5)
-                ## For a binary alphabet, b-ary entropy is
-                ## H(A) = sum_i(b*log_2(b))
-                ## where b is the probability a letter
-                ## in the alphabet
-                ## appears at slot i (i.e. = t above).
-                ## In this case b = p(A) = p(b) = 0.5 for all i.
-        else:
-            H_b +=  -0.5 * np.log2(0.5)
-
-        # And see if a decision can be made
-        decision = _decider(H_a * norm_const, 
-                H_b * norm_const, threshold, ii+1)
-        if decision != None:
-            return decision
-    else:
-        # If threshold is never met,
-        # we end up here...
-        return 'N', None, None, None
-
-
-# TODO: test me
-def likelihood_ratio(self, trial, threshold, **params):
-    """ Use a version of the sequential ratio test to decide (log_10). """
-     
-    from math import log, fabs
-    
-    # Transform threshold to suitable deciban
-    # equivilant.
-    dthreshold = threshold * 2.0
-        ## 2 decibans is 99% confidence,
-        ## so use that to map threshold (0-1)
-        ## to the deciban threshold (dthreshold).
-
-    p_A = 0.5
-    p_B = 0.5
-    logLR = 0
-    for ii,t in enumerate(trial):
-        if t == 'A':
-            p_A += 1 / self.l
-        else:
-            p_B += 1 / self.l
-        
-        logLR += log(p_A/p_B, 10)
-        
-        # A custom decision function
-        # was necessary:
-        if fabs(logLR) >= dthreshold:
-            if logLR > 0:
-                return 'A', logLR, 0, ii+1
-            elif logLR < 0:
-                return 'B', 0, logLR, ii+1
-            elif logLR == 0:
-                return 'N', logLR, logLR, ii+1
-            else:
-                # It should be impossible to get here, however
-                # just in case something very odd happens....
-                raise ValueError("Something is very wrong with the scores.")
-    else:
-       # If threshold is never met,
-       # we end up here...
-       return 'N', None, None, None
-    
-
-def drift(self, trial, threshold, **params):
-    pass 
-    # TODO
-
-
-def first_n(self, trial, threshold, **params):
-    """ 
-    Use count() and only the last <n> exemplars to make the 
-    decision on <trial>.  params should contain <n>.
-    """
-
-    n = params['n']
-    return count(self, trial[0:n], threshold)
-
-
-def last_n(self, trial, threshold, **params):
-    """ 
-    Use count() and only the first <n> exemplars to make the 
-    decision on <trial>.  params should contain <n>.
-    """
-    
-    n = params['n']
-    return count(self, trial[-n:], threshold)
-
+#         return _create_d_result('N', None, None, None)

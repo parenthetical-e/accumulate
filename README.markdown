@@ -18,10 +18,10 @@ Now we can do some work...
 
 Let us consider trials with a max length of 4.  This is shorter than you'll want in practice but allows for easy visualization of the results.  Also, to simplify implementation *l* must be even.
 
-First create an exhaustive experiment.  AccumulationExp() takes one argument, the max trial length, *l*.
+First create an exhaustive experiment.  AccumulationTrials() takes one argument, the max trial length, *l*.
 	
 	l = 4
-	exp1 = accumulate.sim.base.Exp(l)
+	exp1 = accumulate.sim.base.Trials(l)
 		
 So what do we have?  All possible trial designs live in trials.
 
@@ -170,7 +170,7 @@ Smaller numbers mean harder trials; smaller means closer to undecidable.
 
 # Statistics
 
-The accumulate.stats submodule calculates aggregate statistics for AccumulationExp.categorize() results.  Right now it only implements a scores function that returns (M,SD,VAR,N) for A,B and N for score (the value of the selected), off_score (the values for the unchosen option) and length (until criterion).
+The accumulate.stats submodule calculates aggregate statistics for AccumulationTrials.categorize() results.  Right now it only implements a scores function that returns (M,SD,VAR,N) for A,B and N for score (the value of the selected), off_score (the values for the unchosen option) and length (until criterion).
 
 For example:
 
