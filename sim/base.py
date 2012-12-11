@@ -81,7 +81,7 @@ class Trials():
         self.trials = self._generate_trials()
         
 
-    def categorize(self, models, threshold=0.5):
+    def categorize(self, model, threshold, decider):
         """ Return category decisions, scores for both the chosen and 
         the not, the number of exemplars experienced, using the 
         decision criterion <decide> ('count', 'bayes', 'likelihood', 
@@ -97,24 +97,23 @@ class Trials():
 
         # OK. Run the models.
         model_results = defaultdict(dict)
-        for decider in models:
-            while self.trial_count < self.max_trial_count:
-                trial = ''.join(self.trials.next())
+        while self.trial_count < self.max_trial_count:
+            trial = ''.join(self.trials.next())
 
-                # Make a decision
-                decision = decider(trial, threshold)
-                    ## If the decider needs parameters construct
-                    ## via closure, see the code 
-                    ## accumulate.models.construct for details
+            # Make a decision
+            decision = model(trial, threshold, decider)
+                ## If the decider needs parameters construct
+                ## via closure, see the code 
+                ## accumulate.models.construct for details
 
-                # Then store it in the (2) nested dict, model_results    
-                model_results[trial][decider.__name__] = decision
+            # Then store it in the (2) nested dict, model_results    
+            model_results[trial][model.__name__] = decision
                 
-                # Update the stop counter
-                self.trial_count += 1
+            # Update the stop counter
+            self.trial_count += 1
 
-            # For the next model, refresh trials.
-            self.trials = self._generate_trials()
+        # For the next model, refresh trials.
+        self.trials = self._generate_trials()
 
         return model_results
 

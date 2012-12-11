@@ -3,14 +3,27 @@
 import csv
 from accumulate.stats import correct
 
+# TODO test
+def combine(results_list):
+    """ Combine results by trial. """
+    
+    trials = results_list[0].keys()
+    combined = defaultdict(dict)
+    for trial in trials:
+        for res in results_list:
+            mod, data = res[trial].items()
+            combined[trial][mod] = data
+    
+    return combined
+
 
 def tabulate(filename, trials, model_results, include_acc):
     """ Use the Trials instance <trials> and the <model_results> from
-    a call of trials.categorize() to generate a tabulated (csv) set trial
+    a call of trials.categorize() to generate a tabulated (csv) set of trial
     level results and meta-data suitable for import into another analysis
     package, e.g. R. 
     
-    The format mirrors that one would need to create a data.table in R. """
+    The format mirrors a data.table in R. """
 
     # Open and prep the csv filehandle,
     # write the header info too

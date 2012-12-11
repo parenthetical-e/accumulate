@@ -3,7 +3,8 @@ import pprint
 from accumulate.sim.base import Trials
 from accumulate.stats import divergence, divergence_by_trial, correct, reaction_time_difference, mean_rt
 from accumulate.models import models, construct
-from accumulate.sim.results import tabulate
+from accumulate.sim.results import tabulate, combine
+from accumulate.models.deciders import absolute
 
 
 def simple_run(l, threshold):
@@ -16,12 +17,15 @@ def simple_run(l, threshold):
     # add them all the the list of models to run, i.e. to 
     # use to categorize the trials in Trials.
     run_models = [models.information, models.likelihood_ratio, models.abscount, 
-            models.relcount, models.naive_probability ]  
+            models.relcount, models.naive_probability]  
                 ## TODO add constructed.
 
     # Create the experimental instance
     exp = Trials(l)
-    result = exp.categorize(run_models, threshold)
+    results_list = list()
+    [results_list.append(exp.categorize(rmod, threshold, absolute)) 
+            for rmod in run_models]
+    result = combine(results_list)
 
     # and analyze it.
     # stats_l = scores(res_l)
@@ -40,8 +44,8 @@ def simple_run(l, threshold):
     for model in run_models:
         model_name = model.__name__
         print(model_name)
-        print("ACC:")
-        pp.pprint(correct(model_name, result))
+        # print("ACC:")
+        # pp.pprint(correct(model_name, result))
     #     print("Delta RT:")
     #     pp.pprint(reaction_time_difference(model_name, result))
 
