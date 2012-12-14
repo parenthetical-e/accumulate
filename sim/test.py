@@ -2,42 +2,47 @@
 import pprint
 from accumulate.sim.base import Trials
 from accumulate.stats import divergence, divergence_by_trial, correct, reaction_time_difference, mean_rt
-from accumulate.models import models, construct
+from accumulate.models import construct
 from accumulate.sim.results import tabulate, combine
 from accumulate.models.deciders import absolute
 
 
-def simple_run(l, threshold):
+def simple_run(l, threshold, decider):
 
-    # All (?) models names are:
-    # Construct models with params
-    # TODO
-    
     # Take the constructed models, and any param free models
     # add them all the the list of models to run, i.e. to 
     # use to categorize the trials in Trials.
-    run_models = [models.information, models.likelihood_ratio, models.abscount, 
-            models.relcount, models.naive_probability]  
-                ## TODO add constructed.
-
+    info = construct.create_information(threshold, decider)
+    lratio = construct.create_likelihood_ratio(threshold, decider)
+    absc = construct.create_abscount(threshold, decider)
+    relc = construct.create_relcount(threshold, decider)
+    naive = construct.create_naive_probability(threshold, decider)
+    
+    run_models = [info, lratio, absc, relc, naive]
+    # print(run_models)
     # Create the experimental instance
     exp = Trials(l)
+
+    # Loop over each model and categorize it.
     results_list = list()
-    [results_list.append(exp.categorize(rmod, threshold, absolute)) 
-            for rmod in run_models]
+    [results_list.append(exp.categorize(mod)) for mod in run_models]
+    
+    # Reformat the results
     result = combine(results_list)
 
-    # and analyze it.
+    # And analyze it.
     # stats_l = scores(res_l)
-    divs = divergence_by_trial(result)
-    meandivs = divergence(result)
+    # divs = divergence_by_trial(result)
+    # meandivs = divergence(result)
+    speeds = exp.maxspeed(0, 5)
     
-    pp = pprint.PrettyPrinter(indent=4,depth=6)
-    pp.pprint(result.items())
-    pp.pprint(meandivs.items())
+    # pp = pprint.PrettyPrinter(indent=4,depth=6)
+    # pp.pprint(result.items())
+    # pp.pprint(meandivs.items())
 
     # dists = exp.distances()
     # pp.pprint(dists)
+    # pp.pprint(speeds)
     
     # print("Mean RTs:")
     # pp.pprint(mean_rt(result))    
@@ -49,9 +54,11 @@ def simple_run(l, threshold):
     #     print("Delta RT:")
     #     pp.pprint(reaction_time_difference(model_name, result))
 
-    tabulate('test_tab.tsv', exp, result, False)
-    tabulate('test_tab_acc.tsv', exp, result, True)
+    print("Saving the results....")
+    tabulate('./testdata/test_tab.csv', exp, result, False)
+    tabulate('./testdata/test_tab_acc.csv', exp, result, True)
+    
     
 if __name__ == "__main__":
-    simple_run(8, 0.65)
+    simple_run(8, 0.65, absolute)
 

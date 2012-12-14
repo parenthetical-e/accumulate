@@ -1,24 +1,76 @@
-from accumulate.models.models import abscount
-
 # TODO:
-# Add urgency gating and
+# Add urgency gating and lba, leaky lba, race, LATER
 # LBAs
 # scipy.stats.binom.sf or scipy.stats.binom_test to do a binomial test
 # and ....
+# Add noise to all functions below.... 
 
-""" Many many models of 2 category accumulation. """
+""" Many many models of 2 category accumulation.  Each is a function closure
+that constructs the final model, which should only take on argument, the trial sequence. """
 import numpy as np
 from accumulate.models.deciders import _create_d_result
 from accumulate.models.noise import dummy
 
-# Add noise to all functions below.... 
+
+def _check_threshold(threshold):
+    """ Checks the threshold is in bound. """
+
+    # Threshold is valid?
+    if threshold >= 1 or threshold <= 0:
+        raise ValueError('<threshold> must be between 0 - 1.')
 
 
+def _p_response(trial, i, letter):
+    """ Use Cisek's method to calculate the p(correct response) for <letter>
+    (i.e. A or B) for <trial> sliced from 0 to <i>. """
+    
+    from math import factorial
+    
+    # Find the counts for A or B
+    # from 0:i
+    cA = 0
+    cB = 0
+    for t in trial[0:i+1]:
+        if t == 'A':
+            cA += 1
+        else:
+            cB += 1
+    
+    # And the number of unseen   
+    cN = len(trial) - cB + cB
+
+    # Use letter to decide the sum
+    # index, in part anyway
+    if letter == 'A':
+        sumlim = cA
+    elif letter == 'B':
+        sumlim = cB
+    else:
+        raise ValueError('letter must be A or B not (0}).'.format(letter))
+    
+    # Create the summation index
+    sumindex = range(min(cN, 7 - sumlim))
+    
+    # Finally calculate the p(correct response)
+    # for either A or B depending on letter 
+    # (i.e. letter)
+    p_r = (cN / (2.0 ** cN)) * sum(
+        [1.0 / (factorial(k) * factorial((cN - k))) for k in sumindex]
+    )
+    
+    return p_r
+    
+    
 def create_abscount(threshold, decider):
-    """ Return a category (A, B, or N (neutral)) for <trial> 
-    based on number of As versus Bs. """
+    """ Create a decision function that use the counts of A and B to 
+    decide. """
+    
+    _check_threshold(threshold)
     
     def abscount(trial):
+        """ Return a category (A, B, or N (neutral)) for <trial> 
+        based on number of As versus Bs. """
+        
         import random
     
         score_A = 0
@@ -35,7 +87,9 @@ def create_abscount(threshold, decider):
             # Norm them
             score_A_norm = score_A / l
             score_B_norm = score_B / l     
-
+            
+            # print("({0}). {1}, {2}".format(ii, score_A_norm, score_B_norm))
+            
             # And see if a decision can be made
             decision = decider(score_A_norm, score_B_norm, threshold, ii+1)
             if decision != None:
@@ -49,10 +103,15 @@ def create_abscount(threshold, decider):
 
     
 def create_relcount(threshold, decider):
-    """ Return a category (A, B, or N (neutral)) for <trial> 
-        based on proportion of As to Bs. """
+    """ Create a decision function that use the relative difference
+    in A and B counts to decide. """
+        
+    _check_threshold(threshold)
         
     def relcount(trial):
+        """ Return a category (A, B, or N (neutral)) for <trial> 
+            based on proportion of As to Bs. """
+        
         cA = 0.0
         cB = 0.0
         for ii, t in enumerate(trial):
@@ -81,41 +140,57 @@ def create_relcount(threshold, decider):
 
 
 def create_naive_probability(threshold, decider):      
-    """ Calculate the likelihood of the continuous sequence of either
-    A or B in <trial>, decide when p_sequence(A) or (B) exceeds <threshold>. """
+    """ Create a decision function using naive (multiplicative)
+    probability estimates. """
+    
+    _check_threshold(threshold)
     
     def naive_probability(trial):
+        """ Calculate the likelihood of the continuous sequence of either
+        A or B in <trial>, decide when p_sequence(A) or (B) exceeds 
+        <threshold>. """
+        
+        from copy import deepcopy
+
+        ## Init
+        score_A = 0
+        score_B = 0        
         lastcat = trial[0]
         p = 0.5
-            ## Init
 
-        for ii,t in enumerate(trial[1:]):
+        # Loop over trial calculating scores.
+        for ii,  hht in enumerate(trial[1:]):
             if t == lastcat:
                 # If t is the same, 
                 # decrease the likelihood (p).
                 p = p * 0.5
-
-                # Test threshold
-                score = 1 - p
-                if score >= threshold:
-                    return _create_d_result(lastcat, score, 0.5, ii+2)
+                
+                # Assign p to a score, also reflect it
+                if t == 'A':
+                    score_A = 1 - deepcopy(p)
+                else:
+                    score_B = 1 - deepcopy(p)
+                
+                # And see if a decision can be made
+                decision = decider(score_A, score_B, threshold, ii+1)
+                if decision != None:
+                    return decision
             else:
                 # Otherwise reset
-                lastcat = t
+                lastcat = deepcopy(t)
                 p = 0.5
-
-        # If threshold is never met,
-        # we end up here...
-        # this is a neutral trial.
-        return _create_d_result('N', None, None, None)
+        else:
+            # If threshold is never met,
+            # we end up here...
+            return _create_d_result('N', None, None, None)
 
     return naive_probability
     
 
 def create_information(threshold, decider):
-    """ Incrementally calculate the binary entropy of the sequence 
-    of As and Bs in <trial>, decide when H(A) or H(B) exceeds 
-    <threshold>. """
+    """ Create a information theory based decision function. """
+    
+    _check_threshold(threshold)
     
     def information(trial):
         H_a = 0
@@ -144,11 +219,16 @@ def create_information(threshold, decider):
             # we end up here...
             return _create_d_result('N', None, None, None)
 
+    return information
+
 
 def create_likelihood_ratio(threshold, decider):
-    """ Use a version of the sequential ratio test to decide (log_10). """
+    """ Create a likelihood_ratio function. """
     
+    _check_threshold(threshold)
+
     def likelihood_ratio(trial):
+        """ Use a version of the sequential ratio test to decide (log_10). """
         from math import log, fabs
     
         # Transform threshold to suitable deciban
@@ -187,7 +267,8 @@ def create_likelihood_ratio(threshold, decider):
                 else:
                     # It should be impossible to get here, however
                     # just in case something very odd happens....
-                    raise ValueError("Something is very wrong with the scores.")
+                    raise ValueError(
+                            "Something is very wrong with the scores.")
         else:
             # If threshold is never met,
             # we end up here...
@@ -195,19 +276,41 @@ def create_likelihood_ratio(threshold, decider):
 
     return likelihood_ratio
 
-
-def create_urgency_gating(threshold, decider):
-    """ TODO """
-        
-    def urgency_gating(trial):
-        
     
+def create_urgency_gating(threshold, decider, gain=0.4):
+    """ Create a urgency_gating function. """
+    
+    _check_threshold(threshold)
+    
+    def urgency_gating(trial):
+        """ Decide using Cisek's urgency geting algorithm. """
+        
+        l = float(len(trial))
+        for ii, t in enumerate(trial):
+            urgency = ii / l
+            
+            pA_ii = _p_reponse(trial, ii, 'A')
+            pB_ii = _p_reponse(trial, ii, 'B')
+            
+            score_A = gain * urgency * (pA_ii - 0.5)
+            score_B = gain * urgency * (pB_ii - 0.5)
+            
+            decision = decider(score_A, score_B, threshold, ii+1)
+            if decision != None:
+                return decision
+        else:
+            # If threshold is never met,
+            # we end up here...
+            return _create_d_result('N', None, None, None)
+
     return urgency_gating
 
 
 def create_lba(threshold, decider, params):
-""" In progress. """ 
-   
+    """ In progress. """ 
+    
+    _check_threshold(threshold)
+    
     def lba(trial):
         pass 
         # TODO
@@ -217,79 +320,34 @@ def create_lba(threshold, decider, params):
     
 def create_leaky_lba(threshold, decider, ):
     
+    _check_threshold(threshold)
+    
     def leaky_lba(trial):
         pass
     
     return leaky_lba
 
 
-def create_first_n(n):
-    """ 
-    Use count() and only the last <n> exemplars to make the 
-    decision on <trial>.  Params should contain <n>.
-    """
-    
-    def first_n(trial, threshold, decider):
-        return abscount(self, trial[0:n], threshold, decider)
-        
-    return first_n
-
-
-def create_last_n(n):
-    """ 
-    Use count() and only the first <n> exemplars to make the 
-    decision on <trial>.  Params should contain <n>.
-    """
-    
-    def last_n(trial, threshold, decider):
-        return abscount(self, trial[-n:], threshold, decider)
-        
-    return last_n
-
-
-# TODO: I is borken, do not use.
-# def bayes(trial, threshold, **params):
-#     """ Use Bayes rule to calculate p(A) and p(B), deciding on the 
-#     category when <threshold> is exceeded. """
-#     from copy import deepcopy
+# # TODO Need to be redone, they're incompatible with the new constructor scheme
+# def create_first_n(n):
+#     """ 
+#     Use count() and only the last <n> exemplars to make the 
+#     decision on <trial>.  Params should contain <n>.
+#     """
+#     
+#     def first_n(trial, threshold, decider):
+#         return abscount(self, trial[0:n], threshold, decider)
+#         
+#     return first_n
 # 
-#     # Init all the probabilites.
-#     pA = 0.5
-#     pB = 0.5
-#     pA_X = 0.5
-#     pB_X = 0.5
 # 
-#     pX = 1.0 / 2.0 ** float(len(trial))
-#     pX_A = pX * 0.5
-#     pX_B = pX * 0.5
+# def create_last_n(n):
+#     """ 
+#     Use count() and only the first <n> exemplars to make the 
+#     decision on <trial>.  Params should contain <n>.
+#     """
+#     
+#     def last_n(trial, threshold, decider):
+#         return abscount(self, trial[-n:], threshold, decider)
 #         
-#     print("----")
-#     print(trial)
-#     for ii, t in enumerate(trial):
-#         # The prior for X (how probable is the 
-#         # current sequence) changes
-#         # as we walk through the trial.
-# 
-#         # pX = 1 / ((2.0 ** float(ii)) + 1.0)
-#         
-#         # Update pA_X or pB_X
-#         if t == 'A':
-#             pA_X = (pA * pX_A) / pX
-#         else:
-#             pB_X = (pB * pX_B) / pX
-#         
-#         print("({5}). pA = {0}, pB = {1}, pX = {2}, pA_X = {3}, pB_X = {4}".format(
-#                 pA, pB, pX, pA_X, pB_X, ii))
-#         # Try to decide
-#         decision = decider(pA_X, pB_X, threshold, ii+1)
-#         if decision != None:
-#             return decision
-#         
-#         # If no decision, 
-#         # update pX from pA.
-#         pX_A = deepcopy(pA_X)
-#         pX_B = deepcopy(pB_X)
-#     else:
-#         # If threshold is never met,
-#         # we end up here...
-#         return _create_d_result('N', None, None, None)
+#     return last_n

@@ -25,7 +25,7 @@ def correct(correct_model, model_results):
 
             # This model's name's answer is:
             answer = result['decision']            
-            if answer == correct_answer:
+            if (answer == correct_answer) and (correct_answer != 'N'):
                 acc[trial].update({alt_model : 1})
             else:
                 acc[trial].update({alt_model : 0})

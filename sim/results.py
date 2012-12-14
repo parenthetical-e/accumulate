@@ -1,6 +1,7 @@
 """ A submodule for processing/exporting results from Trials. """
 
 import csv
+from collections import defaultdict
 from accumulate.stats import correct
 
 # TODO test
@@ -11,7 +12,7 @@ def combine(results_list):
     combined = defaultdict(dict)
     for trial in trials:
         for res in results_list:
-            mod, data = res[trial].items()
+            mod, data = res[trial].items()[0]
             combined[trial][mod] = data
     
     return combined
@@ -29,19 +30,21 @@ def tabulate(filename, trials, model_results, include_acc):
     # write the header info too
     fid = open(filename, 'w')
     writer = csv.writer(fid, delimiter=',')
+
+    header = ["trial", "model", "decision", "score", "altscore", "rt",
+        "distance", "countA", "countB", "maxspeed_front", "maxspeed_back"]
     
     if include_acc:
-        header = ["trial", "model", "decision", "score", "altscore", "rt",
-                "distance", "countA", "correct_model", "acc"]
-    else:
-        header = ["trial", "model", "decision", "score", "altscore", "rt",
-                "distance", "countA"]
+        header = header + ["correct_model", "acc"]
     
     writer.writerow(header)
     
     # Extract meta-data from trials
     distances = trials.distances()
     counts = trials.counts()
+    l = int(trials.l)
+    maxspeed_front = trials.maxspeed(0, l/2-1)
+    maxspeed_back = trials.maxspeed(l/2, l)
 
     # HOW TO LOOP OVER IT ALL SENSIBLY?
     all_trials = model_results.keys()
@@ -57,7 +60,10 @@ def tabulate(filename, trials, model_results, include_acc):
                     data['unchosen_score'],
                     data['rt'],
                     distances[trial],
-                    counts[trial][0]
+                    counts[trial][0],
+                    counts[trial][1],
+                    maxspeed_front[trial],
+                    maxspeed_back[trial]
                     ]
             if include_acc:
                 acc = correct(model, model_results)

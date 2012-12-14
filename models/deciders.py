@@ -37,7 +37,7 @@ def absolute(score_A, score_B, threshold, trial_counter):
 
     # Is the threshold met or exceed? 
     if (score_A >= threshold) or (score_B >= threshold):
-        _result_return(score_A, score_B, trial_counter)
+        return _result_return(score_A, score_B, trial_counter)
         
     # Not met? Return None.
     else:
@@ -52,7 +52,7 @@ def difference(score_A, score_B, threshold, trial_counter):
     
     # Is the threshold met or exceed? 
     if diff >= threshold:
-        _result_return(score_A, score_B, trial_counter)
+        return _result_return(score_A, score_B, trial_counter)
 
     # Not met? Return None.
     else:

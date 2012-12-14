@@ -13,6 +13,8 @@ class Trials():
         else:
             raise ValueError('l must be even.')
         
+        self.l = float(l)
+        
         self.trial_count = 0
         self.trials = self._generate_trials()
         self.max_trial_count = (2 ** int(l))/2
@@ -81,7 +83,7 @@ class Trials():
         self.trials = self._generate_trials()
         
 
-    def categorize(self, model, threshold, decider):
+    def categorize(self, model):
         """ Return category decisions, scores for both the chosen and 
         the not, the number of exemplars experienced, using the 
         decision criterion <decide> ('count', 'bayes', 'likelihood', 
@@ -91,17 +93,13 @@ class Trials():
         params dictionary, e.g. the drift decider needs a weight, w,
         so params would be {'w':0.25} if w was 0.25. """
 
-        # Threshold is valid?
-        if threshold >= 1 or threshold <= 0:
-            raise ValueError('<threshold> must be between 0 - 1.')
-
         # OK. Run the models.
         model_results = defaultdict(dict)
         while self.trial_count < self.max_trial_count:
             trial = ''.join(self.trials.next())
 
             # Make a decision
-            decision = model(trial, threshold, decider)
+            decision = model(trial)
                 ## If the decider needs parameters construct
                 ## via closure, see the code 
                 ## accumulate.models.construct for details
@@ -157,6 +155,37 @@ class Trials():
         return cnts 
 
 
+    def maxspeed(self, start, stop):
+        """ Calculate the speed with which A and B accumulate over a 
+        window.  The window is defined by start and stop, ranging 
+        from 0 to l-1. """
+        
+        speeds = dict()
+        for trial in self.trials:
+            # Apply the window to the trial
+            windowed = trial[start:stop + 1]
+
+            # Now calc the speed of 
+            # the windowed trial.
+            # First count A and Bs
+            cA = 0
+            cB = 0
+            l = float(len(windowed))
+            for w in windowed:
+                if w == 'A':
+                    cA += 1
+                else:
+                    cB += 1
+
+            # Then divide by the length
+            # and pick the largest
+            speeds[''.join(trial)] = max(cA / l, cB / l)
+
+        self.trials =self._generate_trials()
+
+        return speeds
+
+        
     def write_trials(self, encoding=None):
         """ Write out trials, each row is a trial.  
 
