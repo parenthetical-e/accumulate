@@ -1,5 +1,5 @@
 # TODO:
-# Add urgency gating and lba, leaky lba, race, LATER
+# Add urgency gating and lba, leaky lba, race
 # LBAs
 # scipy.stats.binom.sf or scipy.stats.binom_test to do a binomial test
 # and ....
@@ -278,12 +278,12 @@ def create_likelihood_ratio(threshold, decider):
 
     
 def create_urgency_gating(threshold, decider, gain=0.4):
-    """ Create a urgency_gating function. """
+    """ Create a urgency gating function (ala Cisek et al 2009.). """
     
     _check_threshold(threshold)
     
     def urgency_gating(trial):
-        """ Decide using Cisek's urgency geting algorithm. """
+        """ Decide using Cisek's (2009) urgency gating algorithm. """
         
         l = float(len(trial))
         for ii, t in enumerate(trial):
@@ -306,26 +306,62 @@ def create_urgency_gating(threshold, decider, gain=0.4):
     return urgency_gating
 
 
-def create_lba(threshold, decider, params):
-    """ In progress. """ 
+def create_incremental_lba(threshold, decider, k, d):
+    """ Create a version of Brown and Heathcote's (2008) LBA 
+    model modified so A/B updates are exclusive rather than simultaneous. 
+    
+    Input
+    -----
+    k - the start point.
+    d - the drift rate.
+    """ 
     
     _check_threshold(threshold)
     
-    def lba(trial):
-        pass 
-        # TODO
-
-    return lba
+    def incremental_lba(trial):
+        """ Use Brown and Heathcote's (2008) LBA model, modified so A/B updates 
+        are exclusive rather than simultanous, to make the decision. """
+        
+        k = float(k)
+        d = float(d)
+            ## Just in case 
+            ## they're int
+    
+        # Init
+        score_A = k
+        score_B = k
+        for t in trial:
+            if t == 'A':
+                # An incremental version of LBA.
+                # that recognizes the balistic updates 
+                # are exclusive.  A and B updates happen
+                # at each time step.  In this form
+                # updates are exclusive to A or B
+                # but still ballistic.
+                score_A += d
+            else:
+                score_A += d
+                
+            decision = decider(score_A, score_B, threshold, ii+1)
+            if decision != None:
+                return decision
+        else:
+            # If threshold is never met,
+            # we end up here...
+            return _create_d_result('N', None, None, None)            
+    
+    return incremental_lba
     
     
-def create_leaky_lba(threshold, decider, ):
+def create_incremental_lb(threshold, decider, k, d, leak):
+    """ Next! """
     
     _check_threshold(threshold)
     
-    def leaky_lba(trial):
+    def incremental_lb(trial):
         pass
     
-    return leaky_lba
+    return incremental_lb
 
 
 # # TODO Need to be redone, they're incompatible with the new constructor scheme
