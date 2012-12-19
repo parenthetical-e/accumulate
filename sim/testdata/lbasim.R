@@ -19,11 +19,12 @@ rlba <- function(n,b,A,vs,s,t0,st0=0,truncdrifts=TRUE){
 	# 		for all possible choices.
 	# t0 - An RT offset (optional).
 	# st0 - the width of a uniform distribution that can be used for t0. In 
-	# this case, t0~runif(min=t0-st0/2,max=t0+st0/2). This is how Roger 
-	# Ratcliff's model operates, but we haven't found it necessary for the LBA.
+	# 		this case, t0~runif(min=t0-st0/2,max=t0+st0/2). This is how Roger 
+	# 		Ratcliff's model operates, but we haven't found it necessary for 
+	# 		the LBA.
 	# 
 	# truncdrifts - Ensure at least one choice eventually wins?
-  
+	#
 	# 
 	# Output:
 	# ----

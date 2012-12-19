@@ -1,17 +1,16 @@
 # TODO:
-# Add urgency gating and lba, leaky lba, race
-# LBAs
-# scipy.stats.binom.sf or scipy.stats.binom_test to do a binomial test
-# and ....
-# Add noise to all functions below.... 
+# Add lb, race
+# get good params, and run
 
 """ Many many models of 2 category accumulation.  Each is a function closure
-that constructs the final model, which should only take on argument, the trial sequence. """
+that constructs the final model, which should only take one argument: the trial sequence. """
 import numpy as np
 from accumulate.models.deciders import _create_d_result
 from accumulate.models.noise import dummy
 
 
+# Private functions first
+# ----
 def _check_threshold(threshold):
     """ Checks the threshold is in bound. """
 
@@ -60,7 +59,7 @@ def _p_response(trial, i, letter):
     
     return p_r
     
-    
+   
 def create_abscount(threshold, decider):
     """ Create a decision function that use the counts of A and B to 
     decide. """
@@ -76,7 +75,7 @@ def create_abscount(threshold, decider):
         score_A = 0
         score_B = 0
         l = float(len(trial))
-    
+        
         for ii, t in enumerate(trial):
             # Update scores based on t
             if t == 'A':
@@ -98,10 +97,10 @@ def create_abscount(threshold, decider):
             # If threshold is never met,
             # we end up here...
             return _create_d_result('N', None, None, None)
-    
+            
     return abscount
 
-    
+
 def create_relcount(threshold, decider):
     """ Create a decision function that use the relative difference
     in A and B counts to decide. """
@@ -165,7 +164,8 @@ def create_naive_probability(threshold, decider):
                 # decrease the likelihood (p).
                 p = p * 0.5
                 
-                # Assign p to a score, also reflect it
+                # Assign p to a score, 
+                # also reflect it
                 if t == 'A':
                     score_A = 1 - deepcopy(p)
                 else:
@@ -222,8 +222,83 @@ def create_information(threshold, decider):
     return information
 
 
+# TODO - test me!
+def create_snr(threshold, decider):
+    """  Creates a model based on Gardelle et al's mean / SNR model.
+    
+    Note: This was not the best model in that paper (LLR was) but it was close 
+    and in my opinion could be a useful/interesting 'bad model' to approximate 
+    LLR, in some cases anyway (see 'Robust Averaging Across Elements in the 
+    Decision Space' section in their results for an important caveat).  
+    
+    Also, we know the brain tracks averages and variances
+    in economic tasks.
+    
+    See:
+    De Gardelle, V., & Summerfield, C. (2011). Robust averaging during 
+    perceptual judgment. PNAS, 108(32), 13341–6.
+    """
+    
+    _check_threshold(threshold)
+
+    def snr(trial):
+        """ Gardelle et al's mean / SNR model. """
+
+        cA = 0.0
+        cB = 0.0     
+        for ii, t in enumerate(trial):
+            n = ii + 1  ## reindex needed
+                        ## so n is the A/B count
+            
+            # Update the count (cA or cB)
+            # calculate the mean and var
+            # treating the trial sequence 
+            # as a binomial distibution
+            if t == 'A':                
+                cA += 1
+                pA = cA / n
+                meanA = cA * pA
+                varA = cA * pA (1 - pA)
+                
+                # Skip if var is 0 
+                if (varA == 0.00):
+                    continue
+                    
+                score_A = meanA/varA
+            else:
+                cB += 1
+                pB = cB / n
+                meanB = cB * pB
+                varB = cB * pB (1 - pB)
+                
+                # Skip if var is 0 
+                if (varB == 0.00):
+                    continue
+                    
+                score_B = meanB/varB
+            
+            # And see if a decision can be made
+            decision = decider(score_A, score_B, threshold, n)
+            if decision != None:
+                return decision
+                
+        else:
+            # If threshold is never met,
+            # we end up here...
+            return _create_d_result('N', None, None, None)
+
+        return information
+            
+    
 def create_likelihood_ratio(threshold, decider):
-    """ Create a likelihood_ratio function. """
+    """ Create a likelihood_ratio function (i.e. sequential probability ratio 
+    test).
+    
+    Empirical support:
+    ----
+    1. De Gardelle, V., & Summerfield, C. (2011). Robust averaging during 
+    perceptual judgment. PNAS, 108(32), 13341–6.
+    """
     
     _check_threshold(threshold)
 
@@ -287,7 +362,7 @@ def create_urgency_gating(threshold, decider, gain=0.4):
         
         l = float(len(trial))
         for ii, t in enumerate(trial):
-            urgency = ii / l
+            urgency = ii / l  ## Normalized urgency
             
             pA_ii = _p_reponse(trial, ii, 'A')
             pB_ii = _p_reponse(trial, ii, 'B')
@@ -353,12 +428,32 @@ def create_incremental_lba(threshold, decider, k, d):
     return incremental_lba
     
     
-def create_incremental_lb(threshold, decider, k, d, leak):
-    """ Next! """
+def create_incremental_blca(threshold, decider, k, leak, beta):
+    """ Ballistic leaky competing accumulator. 
+    
+    Input
+    ----
+    k - Start point
+    d - Drift rate
+    
+    """
     
     _check_threshold(threshold)
     
-    def incremental_lb(trial):
+    def incremental_blcba(trial):
+        
+        S = k + beta
+        D = k - beta
+    
+    return incremental_lb
+
+
+def create_incremental_bla(threshold, decider, k, d, leak):
+    """ Ballistic leaky accumulator. """
+    
+    _check_threshold(threshold)
+    
+    def reate_incremental_bla(trial):
         pass
     
     return incremental_lb
