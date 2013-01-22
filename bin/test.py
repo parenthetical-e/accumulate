@@ -1,13 +1,15 @@
 """ Top-level control for test/experimental functions. """
 import pprint
 from accumulate.sim.base import Trials
-from accumulate.stats import divergence, divergence_by_trial, correct, reaction_time_difference, mean_rt
+from accumulate.stats import (divergence, divergence_by_trial, 
+        correct, reaction_time_difference, mean_rt)
 from accumulate.models import construct
 from accumulate.sim.results import tabulate, combine
 from accumulate.models.deciders import absolute
 
 
 def simple_run(l, threshold, decider):
+    """ A simple test run. """
 
     # Take the constructed models, and any param free models
     # add them all the the list of models to run, i.e. to 
@@ -17,6 +19,10 @@ def simple_run(l, threshold, decider):
     absc = construct.create_abscount(threshold, decider)
     relc = construct.create_relcount(threshold, decider)
     naive = construct.create_naive_probability(threshold, decider)
+    # TODO - rest of models not here, 
+    # but for leaky also do one with
+    # comp at zero (with leak) and seperatly one 
+    # with leak at 0 (with comp valued)
     
     run_models = [info, lratio, absc, relc, naive]
     # print(run_models)
