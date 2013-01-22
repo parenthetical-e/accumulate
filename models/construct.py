@@ -1,7 +1,3 @@
-# TODO:
-# Add lb, race
-# get good params, and run
-
 """ Many many models of 2 category accumulation.  Each is a function closure
 that constructs the final model, which should only take one argument: the trial sequence. """
 import numpy as np
@@ -62,7 +58,12 @@ def _p_response(trial, i, letter):
    
 def create_abscount(threshold, decider):
     """ Create a decision function that use the counts of A and B to 
-    decide. """
+    decide. 
+    
+    This implements the counting model (so far as I can tell, I can't find a
+    copy, only other references to it) of Audely and Pike (1965) Some 
+    stocastic models of choice, J of Math. and Stat. Psychology, 18, 
+    207-225.  """
     
     _check_threshold(threshold)
     
@@ -103,7 +104,10 @@ def create_abscount(threshold, decider):
 
 def create_relcount(threshold, decider):
     """ Create a decision function that use the relative difference
-    in A and B counts to decide. """
+    in A and B counts to decide. 
+    
+    A variation on Audely and Pike (1965, and abscount()) that uses the 
+    relative ration of A/B instead of an absolute counter. """
         
     _check_threshold(threshold)
         
@@ -353,7 +357,9 @@ def create_likelihood_ratio(threshold, decider):
 
     
 def create_urgency_gating(threshold, decider, gain=0.4):
-    """ Create a urgency gating function (ala Cisek et al 2009.). """
+    """ Create a urgency gating function (i.e. implement: 
+    Cisek et al (2009). Decision making in changing conditions: The urgency 
+    gating model, J Neuro, 29(37) 11560-11571.) """
     
     _check_threshold(threshold)
     
@@ -427,39 +433,122 @@ def create_incremental_lba(threshold, decider, k, d):
     
     return incremental_lba
     
+# TODO -- test
+def create_blca(threshold, decider, length, k, wi, leak, beta):
+    """ Creates a ballistic leaky competing accumulator model based on,
     
-def create_incremental_blca(threshold, decider, k, leak, beta):
-    """ Ballistic leaky competing accumulator. 
+    Usher and McClelland (2001), The time course of perceptual choice: the leaky 
+    competing accumulator model. Psychological Review, 108, 550-592, on which 
+    this code is based. 
+    
+    Note: To keep notation consistent with other models in this framework, 
+    the notation differs from that in Usher and McClelland.
     
     Input
     ----
+    length - Length of the trial
     k - Start point
-    d - Drift rate
-    
+    wi - Intial connection wieght (same for obth A and B)
+    leak - Leak rate
+    beta - inhibtion strength
     """
     
     _check_threshold(threshold)
     
-    def incremental_blcba(trial):
-        
-        S = k + beta
-        D = k - beta
-    
-    return incremental_lb
+    def blcba(trial):
+        """ Decide using Usher and McClelland's (2001) ballistic leaky
+        competing accumulator model. """
+
+        impulse = 1.0 / length  ## Set impulse height to the 
+                                ## maximum possible score
+                                ## is 1 for all trial lengths
+
+        score = 0.0             ## Init at 0
+        for ii, t in enumerate(trial):
+            if t == 'A':
+                rho = wi *  impulse
+            else:
+                rho = -wi * impulse
+
+            score += (2 * rho - 1) - (leak - beta)  ## There is time-step
+                                                    ## in the org equations
+                                                    ## that I am setting to
+                                                    ## 1 as these sims are 
+                                                    ## temporally unit-less, 
+                                                    ## i.e.,
+                                                    ## dt / t = 1
+
+            # Make scores explicit, consistent
+            # with the notation used herein
+            score_A = score
+            score_B = 1 - score_A
+                ## score is equivilant to score_A
+                ## (see rho definition above)
+                ## and B is tied to A
+
+            decision = decider(score_A, score_B, threshold, ii+1)
+            if decision != None:
+                return decision
+            else:
+                # If threshold is never met,
+                # we end up here...
+                return _create_d_result('N', None, None, None)
+           
+    return blcba
+
+  
+# TODO -- Once the org is tested, create free x version of Usher
+def create_blca_freex():
+    pass
 
 
-def create_incremental_bla(threshold, decider, k, d, leak):
-    """ Ballistic leaky accumulator. """
+# TODO
+def create_race(threshold, decider):
+    """ Create a race to threshhold model as described in 
     
+    Rowe et al (2010). Action selection: a race model for the selection and 
+    non-selected actions distinguishes the contribution of premotor and 
+    prefrontal areas. 
+
+    Input
+    -----
+     
+    """
+
     _check_threshold(threshold)
+
+    def race(trial):
+        """ A race to threshold model. """
     
-    def reate_incremental_bla(trial):
+             
+            
+    return race
+
+
+def create_maximim(threshold, decider):
+    """
+    TODO
+    """
+
+    def maximin(trial):
         pass
-    
-    return incremental_lb
+
+    return maximin
 
 
-# # TODO Need to be redone, they're incompatible with the new constructor scheme
+def create_robust_satisficing(threshold, decider):
+    """
+    TODO
+    """
+
+    def robust_satisficing(trial):
+        pass
+
+    return robust_satisficing
+
+
+
+# TODO Need to be redone, they're incompatible with the new constructor scheme
 # def create_first_n(n):
 #     """ 
 #     Use count() and only the last <n> exemplars to make the 

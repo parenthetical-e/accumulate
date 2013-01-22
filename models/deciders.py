@@ -35,7 +35,7 @@ def absolute(score_A, score_B, threshold, trial_counter):
     """ Decide between the (normalized) scores based on <threshold>. 
     This is just a helper function, it is not always used. """
 
-    # Is the threshold met or exceed? 
+    # Is the threshold met or exceeded? 
     if (score_A >= threshold) or (score_B >= threshold):
         return _result_return(score_A, score_B, trial_counter)
         
@@ -50,10 +50,31 @@ def difference(score_A, score_B, threshold, trial_counter):
     
     diff = abs(score_A - score_B)
     
-    # Is the threshold met or exceed? 
+    # Is the threshold met or exceeded? 
     if diff >= threshold:
         return _result_return(score_A, score_B, trial_counter)
 
     # Not met? Return None.
     else:
         return None
+
+
+def tied(score_A, threshold, trial_counter):
+    """ Decide assuming that score_A and score_B are tied such
+    that score_A = 1 - score_B.  As they are tied we only need score_A.
+    
+    Note: this would give equivilant results if score_A and score_B were
+    run through absolute() instead, but is made explicit for clarity
+    and readablity.
+    """
+
+    # Is the threshold met of exceeded?
+    if score_A >= threshold:
+        return _result_return(score_A, (1-score_A), trial_counter)
+    elif (1-score_A) >= threshold:
+        return _result_return((1-score_A), score_A), trial_counter)
+    # Not met, Return None.
+    else:
+        return None
+
+

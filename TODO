@@ -1,15 +1,29 @@
-* ...Rest of models
-    - Bayes, Drift, logLR, and urgency gating
-* Trial level (ranked/sorted) visualization
-* visualization for the correct and rt diff as well
-* Not worth it?; Parallelization for categorization of long sequences; multiprocessing -- go.
-    Create a new method categorization_batch, adding a batch/core number arg
+#  ...Implement rest of models
+## DEBUG:
 
+*. Test: lbs, lcba, others
+
+## ENHANCE:
+
+* While Usher and McClelland (2001) showed that it can't scale, it need not here, and so it may be worth including a feed forward inhibtion model too.
+* Free 'x' version of lcba.
+* Race, see LaBerge 1962 and Logan 2002
+* Wang (2002) pooled inhibition (based on Bogsacz lineariztion in section 2.8 of the 'Physics of decision' paper.
+* Yang and Shandlens (2007; the PR study) softmax/wieght variant
+* Robust methods: Zackenhouse, Bogacz and Holmes (2010)
+* Read Maddoxs COBRA paper ('Base-rate and payoff effects in multidimensional perceptual categorization'); implement?
+
+# Other ENHANCEments:
+
+* Option to save scores for each element of each trial
 * Create way to visualize theoretical HRFs (both individual/trial-level and average) for each model.  This might be a surprise, or at least of use.  From this view some models will certainly conflict with the Wheeler 3 signal paradigm.
 
-* How to sample trials with many many points; it is to massive to due exhaustively....  
+# Long term questions/issues
 
-* What is my p() distribution for these trials and how do I sample it effectively?.  A very large discrete, two states, many slots.
-    - Random would work, but for l=250 that is huge, 
-    - Or I could randomly permute for each hamming distance once for every sampling iteration, ensuring coverage, but perhaps biasing? 
-    - Perhaps sample instead by hamming but weighting the sampling depending on the distribution of hamming Ds; how do I find those!?
+* How to sample trials with < 20 points; it is to massive to do exhaustively....  
+ - Latin-hypercube style monte carlo?
+ - Limit to 'interesting' subsets of Hamming D or rate, or some other trial
+   measure.
+
+* Parallelization?
+
