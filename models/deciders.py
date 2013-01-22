@@ -72,7 +72,8 @@ def tied(score_A, threshold, trial_counter):
     if score_A >= threshold:
         return _result_return(score_A, (1-score_A), trial_counter)
     elif (1-score_A) >= threshold:
-        return _result_return((1-score_A), score_A), trial_counter)
+        return _result_return((1-score_A), score_A, trial_counter)
+
     # Not met, Return None.
     else:
         return None

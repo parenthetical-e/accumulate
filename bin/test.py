@@ -5,10 +5,10 @@ from accumulate.stats import (divergence, divergence_by_trial,
         correct, reaction_time_difference, mean_rt)
 from accumulate.models import construct
 from accumulate.sim.results import tabulate, combine
-from accumulate.models.deciders import absolute
+from accumulate.models.deciders import absolute, difference
 
 
-def simple_run(l, threshold, decider):
+def main(name, l, threshold, decider):
     """ A simple test run. """
 
     # Take the constructed models, and any param free models
@@ -61,10 +61,13 @@ def simple_run(l, threshold, decider):
     #     pp.pprint(reaction_time_difference(model_name, result))
 
     print("Saving the results....")
-    tabulate('./testdata/test_tab.csv', exp, result, False)
-    tabulate('./testdata/test_tab_acc.csv', exp, result, True)
+    tabulate('./testdata/{0}.csv'.format(name), exp, result, False)
+    tabulate('./testdata/{0}_acc.csv'.format(name), exp, result, True)
     
     
 if __name__ == "__main__":
-    simple_run(8, 0.65, absolute)
+    main('l8_abs', 8, 0.65, absolute)
+    main('l14_abs', 14, 0.65, absolute)
 
+    main('l8_diff', 8, 0.65, difference)
+    main('l4_diff', 14, 0.65, difference)

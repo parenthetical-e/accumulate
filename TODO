@@ -1,10 +1,14 @@
 #  ...Implement rest of models
 ## DEBUG:
 
-*. Test: lbs, lcba, others
+*. Test: lba, lcba, snr, and gating all compile.  Gating is producing nonsense
+and the rest need testing. I wish I had a good test case.... think on this
+* Also, what is the story going to be for the poster this anyway. What would be interesting to the most?  
+* Rethink what I want to plot too?
 
 ## ENHANCE:
 
+* Set it up so that constructed function's names include their params or otherwise store the params in some kind of self documenting way.
 * While Usher and McClelland (2001) showed that it can't scale, it need not here, and so it may be worth including a feed forward inhibtion model too.
 * Free 'x' version of lcba.
 * Race, see LaBerge 1962 and Logan 2002

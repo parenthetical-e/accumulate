@@ -162,7 +162,7 @@ def create_naive_probability(threshold, decider):
         p = 0.5
 
         # Loop over trial calculating scores.
-        for ii,  hht in enumerate(trial[1:]):
+        for ii, t in enumerate(trial[1:]):
             if t == lastcat:
                 # If t is the same, 
                 # decrease the likelihood (p).
@@ -240,7 +240,7 @@ def create_snr(threshold, decider):
     
     See:
     De Gardelle, V., & Summerfield, C. (2011). Robust averaging during 
-    perceptual judgment. PNAS, 108(32), 13341–6.
+    perceptual judgment. PNAS, 108(32).
     """
     
     _check_threshold(threshold)
@@ -258,11 +258,13 @@ def create_snr(threshold, decider):
             # calculate the mean and var
             # treating the trial sequence 
             # as a binomial distibution
+            score_A = 0.0
+            score_B = 0.0
             if t == 'A':                
                 cA += 1
                 pA = cA / n
                 meanA = cA * pA
-                varA = cA * pA (1 - pA)
+                varA = cA * pA * (1 - pA)
                 
                 # Skip if var is 0 
                 if (varA == 0.00):
@@ -273,7 +275,7 @@ def create_snr(threshold, decider):
                 cB += 1
                 pB = cB / n
                 meanB = cB * pB
-                varB = cB * pB (1 - pB)
+                varB = cB * pB * (1 - pB)
                 
                 # Skip if var is 0 
                 if (varB == 0.00):
@@ -291,7 +293,7 @@ def create_snr(threshold, decider):
             # we end up here...
             return _create_d_result('N', None, None, None)
 
-        return information
+    return snr
             
     
 def create_likelihood_ratio(threshold, decider):
@@ -301,8 +303,7 @@ def create_likelihood_ratio(threshold, decider):
     Empirical support:
     ----
     1. De Gardelle, V., & Summerfield, C. (2011). Robust averaging during 
-    perceptual judgment. PNAS, 108(32), 13341–6.
-    """
+    perceptual judgment. PNAS, 108(32). """
     
     _check_threshold(threshold)
 
@@ -370,8 +371,8 @@ def create_urgency_gating(threshold, decider, gain=0.4):
         for ii, t in enumerate(trial):
             urgency = ii / l  ## Normalized urgency
             
-            pA_ii = _p_reponse(trial, ii, 'A')
-            pB_ii = _p_reponse(trial, ii, 'B')
+            pA_ii = _p_response(trial, ii, 'A')
+            pB_ii = _p_response(trial, ii, 'B')
             
             score_A = gain * urgency * (pA_ii - 0.5)
             score_B = gain * urgency * (pB_ii - 0.5)
@@ -387,7 +388,7 @@ def create_urgency_gating(threshold, decider, gain=0.4):
     return urgency_gating
 
 
-def create_incremental_lba(threshold, decider, k, d):
+def create_incremental_lba(threshold, decider, k=0.1, d=0.1):
     """ Create a version of Brown and Heathcote's (2008) LBA 
     model modified so A/B updates are exclusive rather than simultaneous. 
     
@@ -396,22 +397,21 @@ def create_incremental_lba(threshold, decider, k, d):
     k - the start point.
     d - the drift rate.
     """ 
-    
+    k = float(k)
+    d = float(d)
+        ## Just in case 
+        ## they're int
+
     _check_threshold(threshold)
     
     def incremental_lba(trial):
         """ Use Brown and Heathcote's (2008) LBA model, modified so A/B updates 
         are exclusive rather than simultanous, to make the decision. """
         
-        k = float(k)
-        d = float(d)
-            ## Just in case 
-            ## they're int
-    
-        # Init
+                # Init
         score_A = k
         score_B = k
-        for t in trial:
+        for ii, t in enumerate(trial):
             if t == 'A':
                 # An incremental version of LBA.
                 # that recognizes the balistic updates 
@@ -434,7 +434,7 @@ def create_incremental_lba(threshold, decider, k, d):
     return incremental_lba
     
 # TODO -- test
-def create_blca(threshold, decider, length, k, wi, leak, beta):
+def create_blca(threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1):
     """ Creates a ballistic leaky competing accumulator model based on,
     
     Usher and McClelland (2001), The time course of perceptual choice: the leaky 

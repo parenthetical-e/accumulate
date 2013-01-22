@@ -1,38 +1,46 @@
 # Functions for plotting table exported accumlate results
 library("ggplot2")
 
+plot.all <- function(acc_filename, rt_filename, trial_length){
+    # Plot all the plots....
+    
+    plot.rt(rt_filename, trial_length)
+    plot.acc(acc_filename)
+}
 
-import.and.plot.rt <- function(rt_filename, trial_length){
+plot.rt <- function(rt_filename, trial_length){
 	# Imports and plots the rt data
 	
 	dt <- read.table(rt_filename, sep=",",header=TRUE)
 	print(str(dt))
 	
-	plot.rt.mean(dt, trial_length)	
-	plot.rt.histogram(dt)
+	.plot.rt.mean(dt, trial_length)	
+	.plot.rt.histogram(dt)
 	
-	plot.rt.difficulty.histogram(dt, trial_length)
-	plot.rt.difficulty.boxplot(dt, trial_length)
+	.plot.rt.difficulty.histogram(dt, trial_length)
+	.plot.rt.difficulty.boxplot(dt, trial_length)
 
-	plot.rt.speedf.histogram(dt, trial_length)
-	plot.rt.speedf.boxplot(dt, trial_length)
+	.plot.rt.speedf.histogram(dt, trial_length)
+	.plot.rt.speedf.boxplot(dt, trial_length)
 }
 
 
-import.and.plot.acc <- function(acc_filename){
+plot.acc <- function(acc_filename){
 	# Imports and plots the acc data
 	
 	dta <- read.table(acc_filename,sep=",",header=TRUE)
 	print(str(dta))
 	
-	plot.acc.mean(dta)
-	plot.acc.difficulty.mean(dta)
-	plot.acc.speedf.mean(dta)
+	.plot.acc.mean(dta)
+	.plot.acc.difficulty.mean(dta)
+	.plot.acc.speedf.mean(dta)
 }
 
+
 # ----
-# WORKER FUNCTIONS
-plot.rt.histogram <- function(dt){
+# PRIVATE WORKER FUNCTIONS....
+# ----
+.plot.rt.histogram <- function(dt){
 	# Creates a lattice of RT distributions for each model.
 	
 	pdf(width=2.5)
@@ -44,7 +52,7 @@ plot.rt.histogram <- function(dt){
 }
 
 
-plot.rt.speedf.histogram <- function(dt, trial_length){
+.plot.rt.speedf.histogram <- function(dt, trial_length){
 	
 	pdf()
 	qplot(rt, 
@@ -58,7 +66,7 @@ plot.rt.speedf.histogram <- function(dt, trial_length){
 	dev.off()
 }
 
-plot.rt.speedf.boxplot <- function(dt, trial_length){
+.plot.rt.speedf.boxplot <- function(dt, trial_length){
 	# Makes a series of boxplots of rt versus difficulty.
 	#
 	# Set trial_length to 1 if you DO NOT
@@ -81,7 +89,7 @@ plot.rt.speedf.boxplot <- function(dt, trial_length){
 }
 
 
-plot.rt.difficulty.histogram <- function(dt, trial_length){
+.plot.rt.difficulty.histogram <- function(dt, trial_length){
 	
 	pdf()
 	qplot(rt, 
@@ -97,7 +105,7 @@ plot.rt.difficulty.histogram <- function(dt, trial_length){
 
 
 
-plot.rt.difficulty.boxplot <- function(dt, trial_length){
+.plot.rt.difficulty.boxplot <- function(dt, trial_length){
 	# Makes a series of boxplots of rt versus difficulty.
 	#
 	# Set trial_length to 1 if you DO NOT
@@ -120,7 +128,7 @@ plot.rt.difficulty.boxplot <- function(dt, trial_length){
 }
 
 
-plot.rt.mean <- function(dt, trial_length){
+.plot.rt.mean <- function(dt, trial_length){
 	# Plot the mean RT for each model in <dt>
 	#
 	# Set trial_length to 1 if you DO NOT
@@ -145,7 +153,7 @@ plot.rt.mean <- function(dt, trial_length){
 }
 
 
-plot.acc.mean <- function(dta){
+.plot.acc.mean <- function(dta){
 	# In a lattice, plot the mean ACC for each model in <dta>
 	# correct model on top, model on x-axis
 	
@@ -170,7 +178,7 @@ plot.acc.mean <- function(dta){
 }
 
 
-plot.acc.difficulty.mean <- function(dta){
+.plot.acc.difficulty.mean <- function(dta){
 	# In a lattice, plot the mean ACC as a function of difficulty
 	# for each model in <dta>.
 	#
@@ -193,7 +201,7 @@ plot.acc.difficulty.mean <- function(dta){
 		dev.off()
 }
 
-plot.acc.speedf.mean <- function(dta){
+.plot.acc.speedf.mean <- function(dta){
 	# In a lattice, plot the mean ACC as a function of difficulty
 	# for each model in <dta>.
 	#
