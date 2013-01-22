@@ -19,6 +19,12 @@ def main(name, l, threshold, decider):
     absc = construct.create_abscount(threshold, decider)
     relc = construct.create_relcount(threshold, decider)
     naive = construct.create_naive_probability(threshold, decider)
+    snr = create_snr(threshold, decider)
+    gating = create_urgency_gating(threshold, decider, gain=0.4)
+    lba = create_incremental_lba(threshold, decider, k=0.1, d=0.1)
+    blca = create_blca(
+            threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1)
+
     # TODO - rest of models not here, 
     # but for leaky also do one with
     # comp at zero (with leak) and seperatly one 
