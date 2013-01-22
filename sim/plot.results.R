@@ -1,12 +1,14 @@
 # Functions for plotting table exported accumlate results
 library("ggplot2")
+library("plyr")
 
-plot.all <- function(acc_filename, rt_filename, trial_length){
+plot.all <- function(acc_filename, rt_filename, trial_length, hit){
     # Plot all the plots....
     
     plot.rt(rt_filename, trial_length)
-    plot.acc(acc_filename)
+    plot.acc(acc_filename, hit)
 }
+
 
 plot.rt <- function(rt_filename, trial_length){
 	# Imports and plots the rt data
@@ -25,15 +27,19 @@ plot.rt <- function(rt_filename, trial_length){
 }
 
 
-plot.acc <- function(acc_filename){
+plot.acc <- function(acc_filename, hit=TRUE){
 	# Imports and plots the acc data
 	
 	dta <- read.table(acc_filename,sep=",",header=TRUE)
 	print(str(dta))
 	
-	.plot.acc.mean(dta)
-	.plot.acc.difficulty.mean(dta)
-	.plot.acc.speedf.mean(dta)
+	.plot.acc.mean(dta, hit)
+	.plot.acc.difficulty.mean(dta, hit)
+	.plot.acc.speedf.mean(dta, hit)
+    .plot.mean.distance.agreement.acc(dta, hit) 
+    .plot.mean.trial.agreement.acc(dta, hit) 
+    .plot.mean.maxspeed.front.agreement.acc(dta, hit)
+
 }
 
 
@@ -153,10 +159,107 @@ plot.acc <- function(acc_filename){
 }
 
 
-.plot.acc.mean <- function(dta){
+.recode_N <- function(dta, hit=TRUE){
+    # If hit recode -1s as 1. If not code as 0.
+
+    mask <- dta[["acc"]] == -1
+    if(hit) { dta[["acc"]][mask] <- 1 }
+    else { dta[["acc"]][mask] <- 0 }
+
+    dta
+}
+
+
+.plot.mean.distance.agreement.acc <- function(dta, hit=TRUE){
+    # Average accuracy for all models for given model
+    # and display as a function of y (i.e. trials, 
+    # distance, speed, etc)
+
+    dta <- .recode_N(dta, hit)
+    simplified = data.frame(
+                model=as.character(dta[["model"]]),
+                distance=as.character(dta[["distance"]]),
+                acc=dta[["acc"]]
+                )
+    print(str(simplified))
+
+    meaned <- ddply(simplified, 
+            .(model, distance), 
+            function(data) { data.frame(acc=mean(data$acc))} 
+        ) 
+
+    pdf(width=14, height=4)
+    qplot(x=model, y=distance, data=meaned, fill=acc, geom="tile") + 
+    scale_fill_gradient2(limits=c(0,1))
+    
+    ggsave("acc_distance_agreement.pdf")
+    dev.off()
+}
+
+
+.plot.mean.trial.agreement.acc <- function(dta, hit=TRUE){
+    # Average accuracy for all models for given model
+    # and display as a function of y (i.e. trials, 
+    # distance, speed, etc)
+
+    dta <- .recode_N(dta, hit)
+    simplified = data.frame(
+                model=as.character(dta[["model"]]),
+                trial=as.character(dta[["trial"]]),
+                acc=dta[["acc"]]
+                )
+    print(str(simplified))
+
+    meaned <- ddply(simplified, 
+            .(model, trial), 
+            function(data) { data.frame(acc=mean(data$acc))} 
+        ) 
+
+    pdf(width=14,height=30)
+    qplot(x=model, y=trial, data=meaned, fill=acc, geom="tile") + 
+    scale_fill_gradient2(limits=c(0,1))
+    
+    ggsave("acc_trial_agreement.pdf")
+    dev.off()
+
+}
+
+
+.plot.mean.maxspeed.front.agreement.acc <- function(dta, hit=TRUE){
+    # Average accuracy for all models for given model
+    # and display as a function of y (i.e. trials, 
+    # distance, speed, etc)
+
+    dta <- .recode_N(dta, hit)
+    simplified = data.frame(
+                model=as.character(dta[["model"]]),
+                maxspeed_front=as.character(dta[["maxspeed_front"]]),
+                acc=dta[["acc"]]
+                )
+    print(str(simplified))
+
+    meaned <- ddply(simplified, 
+            .(model, maxspeed_front), 
+            function(data) { data.frame(acc=mean(data$acc))} 
+        ) 
+
+    pdf(width=14,height=4)
+    qplot(x=model, y=maxspeed_front, data=meaned, fill=acc, geom="tile") + 
+    scale_fill_gradient2(limits=c(0,1))
+    
+    ggsave("acc_maxspeed_front_agreement.pdf")
+    dev.off()
+
+}
+
+
+.plot.acc.mean <- function(dta, hit=TRUE){
 	# In a lattice, plot the mean ACC for each model in <dta>
 	# correct model on top, model on x-axis
 	
+    if(hit) {dta <- .recode_N(dta, hit)}
+    
+    pdf()
 	qplot(
 			x=model, 
 			y=acc, 
@@ -178,11 +281,15 @@ plot.acc <- function(acc_filename){
 }
 
 
-.plot.acc.difficulty.mean <- function(dta){
+.plot.acc.difficulty.mean <- function(dta, hit=TRUE){
 	# In a lattice, plot the mean ACC as a function of difficulty
 	# for each model in <dta>.
 	#
 	# correct model on top, model on x-axis
+
+    if(hit) {dta <- .recode_N(dta, hit)}
+    
+    pdf()
 	qplot(
 			x=distance, 
 			y=acc, 
@@ -201,12 +308,16 @@ plot.acc <- function(acc_filename){
 		dev.off()
 }
 
-.plot.acc.speedf.mean <- function(dta){
+.plot.acc.speedf.mean <- function(dta, hit=TRUE){
 	# In a lattice, plot the mean ACC as a function of difficulty
 	# for each model in <dta>.
 	#
 	# correct model on top, model on x-axis
-	qplot(
+    
+    if(hit) {dta <- .recode_N(dta, hit)}
+    
+    pdf()
+    qplot(
 			x=maxspeed_front, 
 			y=acc, 
 			data=dta, 

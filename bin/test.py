@@ -19,10 +19,10 @@ def main(name, l, threshold, decider):
     absc = construct.create_abscount(threshold, decider)
     relc = construct.create_relcount(threshold, decider)
     naive = construct.create_naive_probability(threshold, decider)
-    snr = create_snr(threshold, decider)
-    gating = create_urgency_gating(threshold, decider, gain=0.4)
-    lba = create_incremental_lba(threshold, decider, k=0.1, d=0.1)
-    blca = create_blca(
+    snr = construct.create_snr(threshold, decider)
+    gating = construct.create_urgency_gating(threshold, decider, gain=0.4)
+    lba = construct.create_incremental_lba(threshold, decider, k=0.1, d=0.1)
+    blca = construct.create_blca(
             threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1)
 
     # TODO - rest of models not here, 
@@ -30,7 +30,7 @@ def main(name, l, threshold, decider):
     # comp at zero (with leak) and seperatly one 
     # with leak at 0 (with comp valued)
     
-    run_models = [info, lratio, absc, relc, naive]
+    run_models = [info, lratio, absc, relc, naive, snr, gating, lba, blca]
     # print(run_models)
     # Create the experimental instance
     exp = Trials(l)
@@ -73,7 +73,7 @@ def main(name, l, threshold, decider):
     
 if __name__ == "__main__":
     main('l8_abs', 8, 0.65, absolute)
-    main('l14_abs', 14, 0.65, absolute)
+    #main('l14_abs', 14, 0.65, absolute)
 
     main('l8_diff', 8, 0.65, difference)
-    main('l4_diff', 14, 0.65, difference)
+    #main('l4_diff', 14, 0.65, difference)

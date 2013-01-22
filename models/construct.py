@@ -373,7 +373,7 @@ def create_urgency_gating(threshold, decider, gain=0.4):
             
             pA_ii = _p_response(trial, ii, 'A')
             pB_ii = _p_response(trial, ii, 'B')
-            
+
             score_A = gain * urgency * (pA_ii - 0.5)
             score_B = gain * urgency * (pB_ii - 0.5)
             
