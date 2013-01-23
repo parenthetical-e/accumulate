@@ -32,7 +32,8 @@ def tabulate(filename, trials, model_results, include_acc):
     writer = csv.writer(fid, delimiter=',')
 
     header = ["trial", "model", "decision", "score", "altscore", "rt",
-        "distance", "countA", "countB", "maxspeed_front", "maxspeed_back"]
+        "distance", "countA", "countB", "maxcount", 
+        "maxspeed_front", "maxspeed_back"]
     
     if include_acc:
         header = header + ["correct_model", "acc"]
@@ -62,6 +63,7 @@ def tabulate(filename, trials, model_results, include_acc):
                     distances[trial],
                     counts[trial][0],
                     counts[trial][1],
+                    max(counts[trial][0], counts[trial][1]),
                     maxspeed_front[trial],
                     maxspeed_back[trial]
                     ]
@@ -75,3 +77,4 @@ def tabulate(filename, trials, model_results, include_acc):
 
     # Clean up            
     fid.close()
+
