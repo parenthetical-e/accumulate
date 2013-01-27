@@ -3,16 +3,7 @@ that constructs the final model, which should only take one argument: the trial 
 import numpy as np
 from accumulate.models.deciders import _create_d_result
 from accumulate.models.noise import dummy
-
-
-# Private functions first
-# ----
-def _check_threshold(threshold):
-    """ Checks the threshold is in bound. """
-
-    # Threshold is valid?
-    if threshold >= 1 or threshold <= 0:
-        raise ValueError('<threshold> must be between 0 - 1.')
+from accumulate.models.misc import check_threshold, update_name
 
 
 def _p_response(trial, i, letter):
@@ -56,7 +47,7 @@ def _p_response(trial, i, letter):
     return p_r
     
    
-def create_abscount(threshold, decider):
+def create_abscount(name, threshold, decider):
     """ Create a decision function that use the counts of A and B to 
     decide. 
     
@@ -65,8 +56,9 @@ def create_abscount(threshold, decider):
     stocastic models of choice, J of Math. and Stat. Psychology, 18, 
     207-225.  """
     
-    _check_threshold(threshold)
+    check_threshold(threshold)
     
+    @update_name(name)
     def abscount(trial):
         """ Return a category (A, B, or N (neutral)) for <trial> 
         based on number of As versus Bs. """
@@ -98,19 +90,20 @@ def create_abscount(threshold, decider):
             # If threshold is never met,
             # we end up here...
             return _create_d_result('N', None, None, None)
-            
+    
     return abscount
 
 
-def create_relcount(threshold, decider):
+def create_relcount(name, threshold, decider):
     """ Create a decision function that use the relative difference
     in A and B counts to decide. 
     
     A variation on Audely and Pike (1965, and abscount()) that uses the 
     relative ration of A/B instead of an absolute counter. """
         
-    _check_threshold(threshold)
-        
+    check_threshold(threshold)
+    
+    @update_name(name)    
     def relcount(trial):
         """ Return a category (A, B, or N (neutral)) for <trial> 
             based on proportion of As to Bs. """
@@ -142,12 +135,13 @@ def create_relcount(threshold, decider):
     return relcount
 
 
-def create_naive_probability(threshold, decider):      
+def create_naive_probability(name, threshold, decider):      
     """ Create a decision function using naive (multiplicative)
     probability estimates. """
     
-    _check_threshold(threshold)
-    
+    check_threshold(threshold)
+
+    @update_name(name)
     def naive_probability(trial):
         """ Calculate the likelihood of the continuous sequence of either
         A or B in <trial>, decide when p_sequence(A) or (B) exceeds 
@@ -191,11 +185,12 @@ def create_naive_probability(threshold, decider):
     return naive_probability
     
 
-def create_information(threshold, decider):
+def create_information(name, threshold, decider):
     """ Create a information theory based decision function. """
     
-    _check_threshold(threshold)
+    check_threshold(threshold)
     
+    @update_name(name)
     def information(trial):
         H_a = 0
         H_b = 0
@@ -227,7 +222,7 @@ def create_information(threshold, decider):
 
 
 # TODO - test me!
-def create_snr(threshold, decider):
+def create_snr(name, threshold, decider):
     """  Creates a model based on Gardelle et al's mean / SNR model.
     
     Note: This was not the best model in that paper (LLR was) but it was close 
@@ -243,8 +238,9 @@ def create_snr(threshold, decider):
     perceptual judgment. PNAS, 108(32).
     """
     
-    _check_threshold(threshold)
+    check_threshold(threshold)
 
+    @update_name(name)
     def snr(trial):
         """ Gardelle et al's mean / SNR model. """
 
@@ -296,7 +292,7 @@ def create_snr(threshold, decider):
     return snr
             
     
-def create_likelihood_ratio(threshold, decider):
+def create_likelihood_ratio(name, threshold, decider):
     """ Create a likelihood_ratio function (i.e. sequential probability ratio 
     test).
     
@@ -305,8 +301,9 @@ def create_likelihood_ratio(threshold, decider):
     1. De Gardelle, V., & Summerfield, C. (2011). Robust averaging during 
     perceptual judgment. PNAS, 108(32). """
     
-    _check_threshold(threshold)
+    check_threshold(threshold)
 
+    @update_name(name)
     def likelihood_ratio(trial):
         """ Use a version of the sequential ratio test to decide (log_10). """
         from math import log, fabs
@@ -357,13 +354,14 @@ def create_likelihood_ratio(threshold, decider):
     return likelihood_ratio
 
     
-def create_urgency_gating(threshold, decider, gain=0.4):
+def create_urgency_gating(name, threshold, decider, gain=0.4):
     """ Create a urgency gating function (i.e. implement: 
     Cisek et al (2009). Decision making in changing conditions: The urgency 
     gating model, J Neuro, 29(37) 11560-11571.) """
     
-    _check_threshold(threshold)
-    
+    check_threshold(threshold)
+
+    @update_name(name)    
     def urgency_gating(trial):
         """ Decide using Cisek's (2009) urgency gating algorithm. """
         
@@ -388,7 +386,7 @@ def create_urgency_gating(threshold, decider, gain=0.4):
     return urgency_gating
 
 
-def create_incremental_lba(threshold, decider, k=0.1, d=0.1):
+def create_incremental_lba(name, threshold, decider, k=0.1, d=0.1):
     """ Create a version of Brown and Heathcote's (2008) LBA 
     model modified so A/B updates are exclusive rather than simultaneous. 
     
@@ -402,8 +400,9 @@ def create_incremental_lba(threshold, decider, k=0.1, d=0.1):
         ## Just in case 
         ## they're int
 
-    _check_threshold(threshold)
-    
+    check_threshold(threshold)
+
+    @update_name(name)
     def incremental_lba(trial):
         """ Use Brown and Heathcote's (2008) LBA model, modified so A/B updates 
         are exclusive rather than simultanous, to make the decision. """
@@ -434,7 +433,7 @@ def create_incremental_lba(threshold, decider, k=0.1, d=0.1):
     return incremental_lba
     
 # TODO -- test
-def create_blca(threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1):
+def create_blca(name, threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1):
     """ Creates a ballistic leaky competing accumulator model based on,
     
     Usher and McClelland (2001), The time course of perceptual choice: the leaky 
@@ -453,8 +452,9 @@ def create_blca(threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1
     beta - inhibtion strength
     """
     
-    _check_threshold(threshold)
+    check_threshold(threshold)
     
+    @update_name(name)
     def blcba(trial):
         """ Decide using Usher and McClelland's (2001) ballistic leaky
         competing accumulator model. """
@@ -503,7 +503,7 @@ def create_blca_freex():
 
 
 # TODO
-def create_race(threshold, decider):
+def create_race(name, threshold, decider):
     """ Create a race to threshhold model as described in 
     
     Rowe et al (2010). Action selection: a race model for the selection and 
@@ -515,8 +515,9 @@ def create_race(threshold, decider):
      
     """
 
-    _check_threshold(threshold)
+    check_threshold(threshold)
 
+    @update_name(name)
     def race(trial):
         """ A race to threshold model. """
     
@@ -525,49 +526,26 @@ def create_race(threshold, decider):
     return race
 
 
-def create_maximim(threshold, decider):
+def create_maximim(name, threshold, decider):
     """
     TODO
     """
 
+    @update_name(name)
     def maximin(trial):
         pass
 
     return maximin
 
 
-def create_robust_satisficing(threshold, decider):
+def create_robust_satisficing(name, threshold, decider):
     """
     TODO
     """
 
+    @update_name(name)
     def robust_satisficing(trial):
         pass
 
     return robust_satisficing
 
-
-
-# TODO Need to be redone, they're incompatible with the new constructor scheme
-# def create_first_n(n):
-#     """ 
-#     Use count() and only the last <n> exemplars to make the 
-#     decision on <trial>.  Params should contain <n>.
-#     """
-#     
-#     def first_n(trial, threshold, decider):
-#         return abscount(self, trial[0:n], threshold, decider)
-#         
-#     return first_n
-# 
-# 
-# def create_last_n(n):
-#     """ 
-#     Use count() and only the first <n> exemplars to make the 
-#     decision on <trial>.  Params should contain <n>.
-#     """
-#     
-#     def last_n(trial, threshold, decider):
-#         return abscount(self, trial[-n:], threshold, decider)
-#         
-#     return last_n

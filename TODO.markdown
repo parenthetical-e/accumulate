@@ -1,10 +1,11 @@
 #  ...Implement rest of models
-## DEBUG:
+ * Read Hanes and Schalls, Science, 1996 for the (first) constant threhold accum observation.
 
-*. Test: lba, lcba, snr, and gating all compile.  Gating is producing nonsense
+## DEBUG or other issues
+
+* Test: lba, lcba, snr, and gating all compile.  Gating is producing nonsense
 and the rest need testing. I wish I had a good test case.... think on this
-* Also, what is the story going to be for the poster this anyway. What would be interesting to the most?  
-* Rethink what I want to plot too?
+* No params are good yet.
 
 ## ENHANCE:
 
@@ -28,6 +29,4 @@ and the rest need testing. I wish I had a good test case.... think on this
  - Latin-hypercube style monte carlo?
  - Limit to 'interesting' subsets of Hamming D or rate, or some other trial
    measure.
-
 * Parallelization?
-

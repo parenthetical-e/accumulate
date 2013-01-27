@@ -7,7 +7,7 @@
 library("ggplot2")
 library("plyr")
 
-plot.all <- function(acc_filename, rt_filename, trial_length, hit){
+plot.all <- function(acc_filename, rt_filename, trial_length){
     # Plot all the plots....
     
     plot.rt(rt_filename, trial_length)
@@ -65,6 +65,7 @@ plot.acc <- function(acc_filename){
 
 plot.scores <- function(rt_filename){
     # Plot scores.
+
 	dt <- read.table(rt_filename, sep=",",header=TRUE)
 	print(str(dt))
 
@@ -126,12 +127,11 @@ plot.scores <- function(rt_filename){
     
     # Cleanup
     dev.off()
-
 }
 
 
 .plot.rt.histogram <- function(dt, trial_length, facet1, facet2, width, height){
-# Creates a lattice of RT distributions for each model.
+    # Creates a lattice of RT distributions for each model.
 	
 	pdf(width=width, height=height)
 
@@ -315,15 +315,15 @@ plot.scores <- function(rt_filename){
             } 
         ) 
     
-    # Sort the sort the levels of trials to match
+    # Use sortby to sort the trials...
     # the second step is needed to make ggplot2
-    # bahave
+    # foloow the sorted order while plotting
     meaned <- meaned[order(meaned$sortby), ]
     meaned$trial <- factor(meaned$trial, levels = as.character(meaned$trial))
 
     pdf(width=width,height=height)
     qplot(x=model, y=trial, data=meaned, fill=acc, geom="tile") + 
-    xlab(paste("Trials (sorted by ", sortby, ")",sep="")) +
+    ylab(paste("Trials (sorted by ", sortby, ")",sep="")) +
     scale_fill_gradient2(limits=c(0,1))
 
     ggsave(paste("acc_sortedagreement_", sortby,"_", hit, ".pdf", sep=""))
