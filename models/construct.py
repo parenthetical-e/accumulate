@@ -428,6 +428,7 @@ def create_incremental_lba(name, threshold, decider, k=0.1, d=0.1):
     k - the start point.
     d - the drift rate.
     """ 
+    
     k = float(k)
     d = float(d)
         ## Just in case 
@@ -453,7 +454,7 @@ def create_incremental_lba(name, threshold, decider, k=0.1, d=0.1):
                 # but still ballistic.
                 score_A += d
             else:
-                score_A += d
+                score_B += d
                 
             decision = decider(score_A, score_B, threshold, ii+1)
             if decision != None:
@@ -480,9 +481,9 @@ def create_blca(name, threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, be
     ----
     length - Length of the trial
     k - Start point
-    wi - Intial connection wieght (same for obth A and B)
+    wi - Initial connection weight (same for both A and B)
     leak - Leak rate
-    beta - inhibtion strength
+    beta - Inhibition strength
     """
     
     check_threshold(threshold)
