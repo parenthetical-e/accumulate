@@ -1,50 +1,10 @@
 """ Many many models of 2 category accumulation.  Each is a function closure
 that constructs the final model, which should only take one argument: the trial sequence. """
+from math import log, fabs
 import numpy as np
 from accumulate.models.deciders import _create_d_result
 from accumulate.models.noise import dummy
 from accumulate.models.misc import check_threshold, update_name
-
-
-def _p_response(trial, i, letter):
-    """ Use Cisek's method to calculate the p(correct response) for <letter>
-    (i.e. A or B) for <trial> sliced from 0 to <i>. """
-    
-    from math import factorial
-    
-    # Find the counts for A or B
-    # from 0:i
-    cA = 0
-    cB = 0
-    for t in trial[0:i+1]:
-        if t == 'A':
-            cA += 1
-        else:
-            cB += 1
-    
-    # And the number of unseen   
-    cN = len(trial) - cB + cB
-
-    # Use letter to decide the sum
-    # index, in part anyway
-    if letter == 'A':
-        sumlim = cA
-    elif letter == 'B':
-        sumlim = cB
-    else:
-        raise ValueError('letter must be A or B not (0}).'.format(letter))
-    
-    # Create the summation index
-    sumindex = range(min(cN, 7 - sumlim))
-    
-    # Finally calculate the p(correct response)
-    # for either A or B depending on letter 
-    # (i.e. letter)
-    p_r = (cN / (2.0 ** cN)) * sum(
-        [1.0 / (factorial(k) * factorial((cN - k))) for k in sumindex]
-    )
-    
-    return p_r
     
    
 def create_abscount(name, threshold, decider):
@@ -306,7 +266,6 @@ def create_likelihood_ratio(name, threshold, decider):
     @update_name(name)
     def likelihood_ratio(trial):
         """ Use a version of the sequential ratio test to decide (log_10). """
-        from math import log, fabs
     
         # Transform threshold to suitable deciban
         # equivilant.
@@ -353,11 +312,80 @@ def create_likelihood_ratio(name, threshold, decider):
 
     return likelihood_ratio
 
+
+def _p_response(trial, i, letter):
+    """ Use Cisek's method to calculate the p(correct response) for <letter>
+    (i.e. A or B) for <trial> sliced from 0 to <i>. """
     
+    from math import factorial
+    
+    print("i: {0}".format(i))
+    print("trial: {0}".format(trial))
+    
+    # Find the counts for A or B
+    # from 0:i
+    cA = 0
+    cB = 0
+    for t in trial[0:i+1]:
+        if t == 'A':
+            cA += 1
+        else:
+            cB += 1
+    
+    # print("cA: {0}, cB: {1}".format(cA, cB))
+    # And the number of unseen   
+    l = len(trial)
+    # print("l: {0}".format(l))
+    # print("cA: {0}".format(cA))
+    # print("cB: {0}".format(cB))
+    # print("cA+cA: {0}".format(cA+cB))
+    cN = l - (cA + cB)
+
+    # Use letter to decide the sum
+    # index, in part anyway
+    if letter == 'A':
+        sumlim = cA
+    elif letter == 'B':
+        sumlim = cB
+    else:
+        raise ValueError('letter must be A or B not (0}).'.format(letter))
+    # print("sumlim: {0}".format(sumlim))
+        
+    # Create the summation index
+    maxN = (len(trial)/2) - 1
+    possN =  int(fabs(maxN - sumlim))
+
+    # print("cN: {0}".format(cN))
+    # print("maxN: {0}".format(maxN))
+    # print("possN: {0}".format(possN))
+    
+    sumindex = range(min(cN, possN))
+    # print("sumindex: {0}".format(sumindex))
+    
+    # Finally calculate the p(correct response)
+    # for either A or B depending on letter 
+    # (i.e. letter)
+    factorials = [1.0 / (factorial(k) * factorial((cN - k))) for k in sumindex]
+    # print("factorials: {0}".format(factorials))
+    remaining_combinations = sum(
+        factorials
+    )
+    # print("remaining_combinations: {0}".format(remaining_combinations))
+    
+    rescaler = (cN / (2.0 ** cN))
+    # print("rescaler: {0}".format(rescaler))
+    
+    p_r = rescaler * remaining_combinations
+    
+    
+    return p_r
+    
+        
 def create_urgency_gating(name, threshold, decider, gain=0.4):
     """ Create a urgency gating function (i.e. implement: 
-    Cisek et al (2009). Decision making in changing conditions: The urgency 
-    gating model, J Neuro, 29(37) 11560-11571.) """
+    Cisek et al (2009). Decision making in changing 
+    conditions: The urgency gating model, J Neuro, 29(37) 
+    11560-11571.) """
     
     check_threshold(threshold)
 
@@ -367,14 +395,19 @@ def create_urgency_gating(name, threshold, decider, gain=0.4):
         
         l = float(len(trial))
         for ii, t in enumerate(trial):
-            urgency = ii / l  ## Normalized urgency
+            urgency = ii  ## urgency is elapsed "time",
+                          ## i.e. a index of trial length
             
             pA_ii = _p_response(trial, ii, 'A')
             pB_ii = _p_response(trial, ii, 'B')
-
-            score_A = gain * urgency * (pA_ii - 0.5)
-            score_B = gain * urgency * (pB_ii - 0.5)
+            print("pA_ii: {0}".format(pA_ii))
+            print("pB_ii: {0}".format(pB_ii))
             
+            score_A = fabs(gain * urgency * (pA_ii - 0.5))
+            score_B = fabs(gain * urgency * (pB_ii - 0.5))
+            print("score_A: {0}".format(score_A))
+            print("score_B: {0}".format(score_B))
+
             decision = decider(score_A, score_B, threshold, ii+1)
             if decision != None:
                 return decision

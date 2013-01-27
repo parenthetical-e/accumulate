@@ -1,8 +1,18 @@
-""" Helper or miscellaneous function for (accumulate) models. """
+""" Helper or miscellaneous functions for (accumulate) models. """
 
 
 class update_name():
-    """ A decorator that renames __name__ of model to <name>. """
+    """ A decorator that renames __name__ of model (a function) to <name>. 
+    
+    Use:
+    ----
+    @update_name("new_better_name")
+    def model(trial):
+        pass
+    
+    >>> model.__name__()
+    new_better_name
+    """
     
     def __init__(self, name):
         self.name = name
@@ -19,3 +29,4 @@ def check_threshold(threshold):
     # Threshold is valid?
     if threshold >= 1 or threshold <= 0:
         raise ValueError('<threshold> must be between 0 - 1.')
+
