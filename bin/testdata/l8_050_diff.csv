@@ -1,0 +1,17 @@
+trial,model,decision,score,altscore,rt,distance,countA,countB,maxcount,maxspeed_front,maxspeed_back
+AAAAAAAA,lratio1,N,,,,4,8,0,8,1.0,1.0
+AAAAAAAA,gating_04,N,,,,4,8,0,8,1.0,1.0
+ABABABAB,lratio1,N,,,,0,4,4,4,0.5,0.5
+ABABABAB,gating_04,B,1.2,0.0,7,0,4,4,4,0.5,0.5
+BBBBBBBB,lratio1,N,,,,4,0,8,8,1.0,1.0
+BBBBBBBB,gating_04,N,,,,4,0,8,8,1.0,1.0
+ABBBBBBB,lratio1,B,-1.38021124171,0,5,3,1,7,7,0.75,1.0
+ABBBBBBB,gating_04,N,,,,3,1,7,7,0.75,1.0
+BAAAAAAA,lratio1,A,1.38021124171,0,5,3,7,1,7,0.75,1.0
+BAAAAAAA,gating_04,N,,,,3,7,1,7,0.75,1.0
+AAAABBBB,lratio1,A,1.0280287236,0,7,4,4,4,4,1.0,1.0
+AAAABBBB,gating_04,B,1.2,0.0,7,4,4,4,4,1.0,1.0
+BABABABA,lratio1,N,,,,0,4,4,4,0.5,0.5
+BABABABA,gating_04,A,1.2,0.0,7,0,4,4,4,0.5,0.5
+BBBBAAAA,lratio1,B,-1.0280287236,0,7,4,4,4,4,1.0,1.0
+BBBBAAAA,gating_04,A,1.2,0.0,7,4,4,4,4,1.0,1.0
