@@ -2,6 +2,7 @@
 import os
 from multiprocessing import Pool
 from accumulate.sim.base import Trials
+from accumulate.sim.test import SelectTrials
 from accumulate.stats import (divergence, divergence_by_trial, 
         correct, reaction_time_difference, mean_rt)
 from accumulate.models import construct
@@ -29,7 +30,7 @@ def main(params):
         pass
     
     # Init the experiment
-    exp = Trials(l)
+    exp = SelectTrials(l)
     
     # Construct the needed models
     # ----
@@ -59,26 +60,28 @@ def main(params):
     
     # --
     # * Linear balistic
-    lba_k0_d006 = construct.create_incremental_lba(
-            "lba_k01_d006", threshold, decider, k=0, d=0.06)            
-    lba_k0_d0125 = construct.create_incremental_lba(
-            "lba_k01_d0125", threshold, decider, k=0, d=0.125)
-    lba_k0_d025 = construct.create_incremental_lba(
-            "lba_k01_d025", threshold, decider, k=0, d=0.25)
-    lba_k0_d050 = construct.create_incremental_lba(
-            "lba_k01_d050", threshold, decider, k=0, d=0.50)
-            
+    ds = [0.6, 0.125, 0.25, 0.5]
+    lbas = [construct.create_incremental_lba(
+            "lba_k0_d{0}".format(d), threshold, decider, k=0, d=d) for d in ds]
+
     # --    
     # * Ballistic leaky competing accumulator.
-    blca1 = construct.create_blca(
-            "blca_k01_wi01_leak01_beta01",
-            threshold, decider, length=l, k=0, wi=0.4, leak=0.1, beta=0.1)
-
+    wis = [0.06, 0.125, 0.25]
+    leaks = [0.01, 0.01, 0]
+    betas = [0.01, 0, 0.01]
+    blcas = []
+    for wi in wis:
+        for leak, beta in zip(leaks, betas):
+            blcas.append(
+                    construct.create_blca(
+                        "blca_k0_wi{0}_leak{1}_beta{2}".format(wi, leak, beta),
+                        threshold, decider, 
+                        length=l, k=0, wi=wi, leak=leak, beta=beta))
     
     # And put all the model in list to run that all
-    run_models = [info, lratio, absc, relc, naive, snr, 
-            lba_k0_d006, lba_k0_d0125, lba_k0_d025, lba_k0_d050, 
-            blca1]
+    run_models = [info, lratio, absc, relc, naive, snr]
+    run_models = run_models + lbas + blcas
+            
 
     # and then loop over each model and categorize it 
     # using exp().

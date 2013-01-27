@@ -466,7 +466,7 @@ def create_incremental_lba(name, threshold, decider, k=0.1, d=0.1):
     
     return incremental_lba
     
-# TODO -- test
+# TODO -- test, 
 def create_blca(name, threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, beta=0.1):
     """ Creates a ballistic leaky competing accumulator model based on,
     
