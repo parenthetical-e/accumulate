@@ -3,7 +3,7 @@
 
 ## DEBUG or other issues
 
-* Debug blca, get params for it too, and run on Cal (change ncore first).
+
 
 ## ENHANCE:
 

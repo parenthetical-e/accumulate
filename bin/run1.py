@@ -30,7 +30,7 @@ def main(params):
         pass
     
     # Init the experiment
-    exp = SelectTrials(l)
+    exp = Trials(l)
     
     # Construct the needed models
     # ----
@@ -102,10 +102,10 @@ if __name__ == "__main__":
     # and a range of thresholds
     
     run_params = [
-        ('l8_051_abs', 8, 0.51, absolute),
-        ('l8_065_abs', 8, 0.65, absolute),
-        ('l8_090_abs', 8, 0.90, absolute)
-        # ('l14_051_abs', 14, 0.51, absolute),
+        # ('l8_051_abs', 8, 0.51, absolute),
+        # ('l8_065_abs', 8, 0.65, absolute),
+        # ('l8_090_abs', 8, 0.90, absolute)
+        ('l14_051_abs', 14, 0.51, absolute),
         # ('l14_065_abs', 14, 0.65, absolute),
         # ('l14_090_abs', 14, 0.90, absolute),
         # ('l18_051_abs', 18, 0.51, absolute),
@@ -117,4 +117,4 @@ if __name__ == "__main__":
     # in parallel across ncore cores
     ncore = 2  ## TODO set to 9 on Cal
     pool = Pool(processes=ncore)
-    map(main, run_params)
+    pool.map(main, run_params)

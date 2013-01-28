@@ -257,8 +257,8 @@ def create_snr(name, threshold, decider, mean_default=False):
                     else:
                         pass
             
-            print("{2} - {3}. score_A: {0}, score_B: {1}".format(
-                score_A, score_B, ii, t))
+            # print("{2} - {3}. score_A: {0}, score_B: {1}".format(
+                # score_A, score_B, ii, t))
             # And see if a decision can be made
             decision = decider(score_A, score_B, threshold, n)
             if decision != None:

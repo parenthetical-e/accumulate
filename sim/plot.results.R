@@ -7,14 +7,6 @@
 library("ggplot2")
 library("plyr")
 
-plot.all <- function(acc_filename, rt_filename, trial_length){
-    # Plot all the plots....
-    
-    plot.rt(rt_filename, trial_length)
-    plot.acc(acc_filename, hit)
-    plot.scores(rt_filename)
-}
-
 
 plot.rt <- function(rt_filename, trial_length){
 	# Imports and plots the rt data
@@ -24,16 +16,16 @@ plot.rt <- function(rt_filename, trial_length){
 	
     .plot.rt.mean(dt, trial_length)	
 	
-    .plot.rt.histogram(dt, trial_length, "model", ".", 4, 4)
+    .plot.rt.histogram(dt, trial_length, "model", ".", 5, 8)
 	.plot.rt.histogram(dt, trial_length, "model", "distance", 9, 8)
 	.plot.rt.histogram(dt, trial_length, "model", "maxcount", 9, 8)
 	.plot.rt.histogram(dt, trial_length, "model", "maxspeed_front", 7, 8)
 	.plot.rt.histogram(dt, trial_length, "model", "maxspeed_back", 7, 8)
 
-	.plot.rt.boxplot(dt, "distance", trial_length, "model", ".", 4, 6)
-	.plot.rt.boxplot(dt, "maxcount", trial_length, "model", ".", 4, 6)
-	.plot.rt.boxplot(dt, "maxspeed_front", trial_length, "model", ".", 4, 6)
-	.plot.rt.boxplot(dt, "maxspeed_back", trial_length, "model", ".", 4, 6)
+	.plot.rt.boxplot(dt, "distance", trial_length, "model", ".", 5, 12)
+	.plot.rt.boxplot(dt, "maxcount", trial_length, "model", ".", 5, 12)
+	.plot.rt.boxplot(dt, "maxspeed_front", trial_length, "model", ".", 5, 12)
+	.plot.rt.boxplot(dt, "maxspeed_back", trial_length, "model", ".", 5, 12)
 }
 
 
@@ -43,23 +35,26 @@ plot.acc <- function(acc_filename){
 	dta <- read.table(acc_filename,sep=",",header=TRUE)
 	print(str(dta))
 	
-    .plot.meanagreement.acc(dta, "distance", 14, 4, TRUE)
-    .plot.meanagreement.acc(dta, "distance", 14, 4, FALSE)
-    .plot.meanagreement.acc(dta, "maxcount", 14, 4, TRUE)
-    .plot.meanagreement.acc(dta, "maxcount", 14, 4, FALSE)
-    .plot.meanagreement.acc(dta, "maxspeed_front", 14, 4, TRUE)
-    .plot.meanagreement.acc(dta, "maxspeed_front", 14, 4, FALSE)
-    .plot.meanagreement.acc(dta, "maxspeed_back", 14, 4, TRUE)
-    .plot.meanagreement.acc(dta, "maxspeed_back", 14, 4, FALSE)
+	.plot.acc.mean(dta, 4, 6, hit=TRUE)
+	.plot.acc.mean(dta, 4, 6, hit=FALSE)
+	
+    .plot.meanagreement.acc(dta, "distance", 7, 4, TRUE)
+    .plot.meanagreement.acc(dta, "distance", 7, 4, FALSE)
+    .plot.meanagreement.acc(dta, "maxcount", 7, 4, TRUE)
+    .plot.meanagreement.acc(dta, "maxcount", 7, 4, FALSE)
+    .plot.meanagreement.acc(dta, "maxspeed_front", 7, 4, TRUE)
+    .plot.meanagreement.acc(dta, "maxspeed_front", 7, 4, FALSE)
+    .plot.meanagreement.acc(dta, "maxspeed_back", 7, 4, TRUE)
+    .plot.meanagreement.acc(dta, "maxspeed_back", 7, 4, FALSE)
 
-    .plot.sortedagreement.acc(dta, "distance", 14, 30, TRUE)
-    .plot.sortedagreement.acc(dta, "distance", 14, 30, FALSE)
-    .plot.sortedagreement.acc(dta, "maxcount", 14, 30, TRUE)
-    .plot.sortedagreement.acc(dta, "maxcount", 14, 30, FALSE)
-    .plot.sortedagreement.acc(dta, "maxspeed_front", 14, 30, TRUE)
-    .plot.sortedagreement.acc(dta, "maxspeed_front", 14, 30, FALSE)
-    .plot.sortedagreement.acc(dta, "maxspeed_back", 14, 30, TRUE)
-    .plot.sortedagreement.acc(dta, "maxspeed_back", 14, 30, FALSE)
+    .plot.sortedagreement.acc(dta, "distance", 7, 30, TRUE)
+    .plot.sortedagreement.acc(dta, "distance", 7, 30, FALSE)
+    .plot.sortedagreement.acc(dta, "maxcount", 7, 30, TRUE)
+    .plot.sortedagreement.acc(dta, "maxcount", 7, 30, FALSE)
+    .plot.sortedagreement.acc(dta, "maxspeed_front", 7, 30, TRUE)
+    .plot.sortedagreement.acc(dta, "maxspeed_front", 7, 30, FALSE)
+    .plot.sortedagreement.acc(dta, "maxspeed_back", 7, 30, TRUE)
+    .plot.sortedagreement.acc(dta, "maxspeed_back", 7, 30, FALSE)
 }
 
 
@@ -274,18 +269,19 @@ plot.scores <- function(rt_filename){
     simplified = data.frame(
                 model=as.character(dta[["model"]]),
                 cby=as.character(dta[[combineby]]),
-                acc=dta[["acc"]]
+                agreement=dta[["acc"]]
                 )
 
     meaned <- ddply(simplified, 
             .(model, cby), 
             function(data) { 
-                data.frame(acc=mean(data$acc), combineby=data$cby)
+                data.frame(agreement=mean(data$agreement), combineby=data$cby)
             } 
         ) 
 
     pdf(width=width, height=height)
-    qplot(x=model, y=cby, data=meaned, fill=acc, geom="tile") + 
+    qplot(x=model, y=cby, data=meaned, fill=agreement, geom="tile") + 
+	opts(axis.text.x=theme_text(angle=-90,  hjust=0)) +
     ylab(combineby) +
     scale_fill_gradient2(limits=c(0,1))
     
@@ -295,7 +291,7 @@ plot.scores <- function(rt_filename){
 
 
 .plot.sortedagreement.acc <- function(dta, sortby, width, height, hit=TRUE){
-    # Average accuracy for all models for given model
+    # Average agreementuracy for all models for given model
     # and display as a function of y (i.e. trials, 
     # distance, speed, etc)
     
@@ -304,14 +300,15 @@ plot.scores <- function(rt_filename){
     simplified = data.frame(
                 model=as.character(dta[["model"]]),
                 trial=as.character(dta[["trial"]]),
-                acc=dta[["acc"]],
+                agreement=dta[["acc"]],
                 sortby=dta[[sortby]]
                 )
 
     meaned <- ddply(simplified, 
                 .(model, trial), 
                 function(data) { 
-                    data.frame(acc=mean(data$acc), sortby=mean(data$sortby)) 
+                    data.frame(agreement=mean(data$agreement),
+							sortby=mean(data$sortby)) 
             } 
         ) 
     
@@ -322,8 +319,9 @@ plot.scores <- function(rt_filename){
     meaned$trial <- factor(meaned$trial, levels = as.character(meaned$trial))
 
     pdf(width=width,height=height)
-    qplot(x=model, y=trial, data=meaned, fill=acc, geom="tile") + 
+    qplot(x=model, y=trial, data=meaned, fill=agreement, geom="tile") + 
     ylab(paste("Trials (sorted by ", sortby, ")",sep="")) +
+	opts(axis.text.x=theme_text(angle=-90,  hjust=0)) +
     scale_fill_gradient2(limits=c(0,1))
 
     ggsave(paste("acc_sortedagreement_", sortby,"_", hit, ".pdf", sep=""))
@@ -331,30 +329,29 @@ plot.scores <- function(rt_filename){
 }
 
 
-.plot.acc.mean <- function(dta, hit=TRUE){
+.plot.acc.mean <- function(dta, width, height, hit=TRUE){
 	# In a lattice, plot the mean ACC for each model in <dta>
 	# correct model on top, model on x-axis
 	
     if(hit) {dta <- .recode_N(dta, hit)}
     
-    pdf()
+    pdf(width=width, height=height)
 	qplot(
 			x=model, 
-			y=acc, 
-			data=dta, 
-			facets=.~correct_model, 
+			y=acc,
+			data=dta,
 			geom=c("bar"), 
 			stat=c("summary"),
 			fun.data="mean_se"
 		) + 
-		ylab("Mean accuracy") + 
+		ylab("Agreement") + 
 		xlab("Model") + 
 		ylim(0,1) + 
 		theme_bw() +
 		opts(axis.text.x=theme_text(angle=-90,  hjust=0)) +
 		geom_hline(aes(yintercept=0.5, color="red"))
 
-		ggsave(paste("acc_mean", ".pdf", sep=""))
+		ggsave(paste("acc_mean_",hit, ".pdf", sep=""))
 		dev.off()
 }
 
