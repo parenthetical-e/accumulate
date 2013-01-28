@@ -4,8 +4,7 @@ from accumulate.sim.base import Trials
 
 class SelectTrials(Trials):
     """ Experiment on a set of select trials whose modeled results should be 
-    intuitive, or otherwise easy to analyze for correctness and 
-    consistency. """    
+    intuitive or otherwise easy to analyze for correctness and consistency. """    
     
     def __init__(self, l):
         Trials.__init__(self, l)
@@ -20,7 +19,7 @@ class SelectTrials(Trials):
     
     
     def _get_test_trials(self):
-        """As is says on the label, get em. """
+        """As is says on the label, get em (a list). """
         
         l = int(self.l)
         test_trials = [
@@ -28,6 +27,8 @@ class SelectTrials(Trials):
             ["B"] * l,
             ["B"] + ["A"] * (l-1),  ## One then rest
             ["A"] + ["B"] * (l-1),
+            ["BB"] + ["A"] * (l-2),  ## Two then rest
+            ["AA"] + ["B"] * (l-2),
             ["A"] * (l/2) + ["B"] * (l/2),  ## Half and half
             ["B"] * (l/2) + ["A"] * (l/2),
             'AB' * (l/2),  ## Alternating A/B

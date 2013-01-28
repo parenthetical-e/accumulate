@@ -35,65 +35,61 @@ def main(params):
     # Construct the needed models
     # ----
     # No params
-    info = construct.create_information(
-            "information", threshold, decider)
-    lratio = construct.create_likelihood_ratio(
-            "likelihood_ratio", threshold, decider)
-    absc = construct.create_abscount(
-            "abscount", threshold, decider)
-    relc = construct.create_relcount(
-            "relcount", threshold, decider)
-    naive = construct.create_naive_probability(
-            "naive", threshold, decider)
-    snr = construct.create_snr(
-            "snr", threshold, decider)
-    
+    # All the models to run go in models
+    models = [
+        construct.create_information("information", threshold, decider),
+        construct.create_likelihood_ratio("likelihood_ratio", threshold, decider),
+        construct.create_abscount("abscount", threshold, decider),
+        construct.create_relcount("relcount", threshold, decider),
+        construct.create_naive_probability("naive", threshold, decider),
+    ]
     # ----
     # Has params:
     
     # --
+    # SNR with and without the mean default
+    models.append(construct.create_snr("snr", threshold, decider, False))
+    models.append(construct.create_snr(
+            "snr_meandefault", threshold, decider, True))
+    
+    # --
     # The p_r calc is bugged, so this model was exlcuded
     # from run1...
-    # * Urgency gating
-    # gating1 = construct.create_urgency_gating(
-            # "gating_g04", threshold, decider, gain=0.4)
+    # * Urgency gating:
+    # models.append(construct.create_urgency_gating(
+            # "urgency_gating_g04", threshold, decider, gain=0.4))
     
     # --
     # * Linear balistic
-    ds = [0.6, 0.125, 0.25, 0.5]
-    lbas = [construct.create_incremental_lba(
-            "lba_k0_d{0}".format(d), threshold, decider, k=0, d=d) for d in ds]
-
-    # --    
+    ds = [0.06, 0.125, 0.25, 0.5]
+    for d in ds:
+        model_name = "lba_k0_d{0}".format(d)
+        models.append(construct.create_incremental_lba(
+                model_name, threshold, decider, k=0, d=d))
+    
+    # --
     # * Ballistic leaky competing accumulator.
     wis = [0.06, 0.125, 0.25]
-    leaks = [0.01, 0.01, 0]
-    betas = [0.01, 0, 0.01]
-    blcas = []
+    leaks = [0.2, 0.2, 0]
+    betas = [0.1, 0, 0.1]
     for wi in wis:
         for leak, beta in zip(leaks, betas):
-            blcas.append(
-                    construct.create_blca(
-                        "blca_k0_wi{0}_leak{1}_beta{2}".format(wi, leak, beta),
-                        threshold, decider, 
-                        length=l, k=0, wi=wi, leak=leak, beta=beta))
+            model_name = "blca_k0_wi{0}_leak{1}_beta{2}".format(wi, leak, beta)
+            models.append(
+                    construct.create_blca(model_name, threshold, decider, 
+                    length=l, k=0, wi=wi, leak=leak, beta=beta))
     
-    # And put all the model in list to run that all
-    run_models = [info, lratio, absc, relc, naive, snr]
-    run_models = run_models + lbas + blcas
-            
-
-    # and then loop over each model and categorize it 
-    # using exp().
-    results_list = [exp.categorize(mod) for mod in run_models]
+    # ----
+    # Loop over each model and categorize it 
+    results_list = [exp.categorize(mod) for mod in models]
 
     # Then tell us what was done.
-    for model in run_models:
+    for model in models:
         print(model.__name__)
-        
+    
     # Reformat the results so they are indexed by trial
     # (in a dict) instead of by the order they appear 
-    # in run_models.
+    # in models.
     result = combine(results_list)
     
     print("Saving the results....")
@@ -106,37 +102,19 @@ if __name__ == "__main__":
     # and a range of thresholds
     
     run_params = [
-        ('l8_025_abs', 8, 0.25, absolute),
-        ('l8_050_abs', 8, 0.50, absolute),
+        ('l8_051_abs', 8, 0.51, absolute),
         ('l8_065_abs', 8, 0.65, absolute),
-        ('l8_090_abs', 8, 0.90, absolute),
-        ('l8_010_diff', 8, 0.10, difference),
-        ('l8_020_diff', 8, 0.20, difference),
-        ('l8_030_diff', 8, 0.30, difference),
-        ('l8_050_diff', 8, 0.50, difference),
-        ('l8_090_diff', 8, 0.90, difference)
-        # ('l14_025_abs', 14, 0.25, absolute),
-        # ('l14_050_abs', 14, 0.50, absolute),
+        ('l8_090_abs', 8, 0.90, absolute)
+        # ('l14_051_abs', 14, 0.51, absolute),
         # ('l14_065_abs', 14, 0.65, absolute),
         # ('l14_090_abs', 14, 0.90, absolute),
-        # ('l14_010_diff', 14, 0.10, difference),
-        # ('l14_020_diff', 14, 0.20, difference),
-        # ('l14_030_diff', 14, 0.30, difference),
-        # ('l14_050_diff', 14, 0.50, difference),
-        # ('l14_090_diff', 14, 0.90, difference)
-        # ('l18_025_abs', 18, 0.25, absolute),
-        # ('l18_050_abs', 18, 0.50, absolute),
+        # ('l18_051_abs', 18, 0.51, absolute),
         # ('l18_065_abs', 18, 0.65, absolute),
-        # ('l18_090_abs', 18, 0.90, absolute),
-        # ('l18_010_diff', 18, 0.10, difference),
-        # ('l18_020_diff', 18, 0.20, difference),
-        # ('l18_030_diff', 18, 0.30, difference),
-        # ('l18_050_diff', 18, 0.50, difference),
-        # ('l18_090_diff', 18, 0.90, difference)
+        # ('l18_090_abs', 18, 0.90, absolute)
     ]
     
     # Cretae a worker Pool and run run_params
     # in parallel across ncore cores
-    ncore = 2
+    ncore = 2  ## TODO set to 9 on Cal
     pool = Pool(processes=ncore)
-    pool.map(main, run_params)
+    map(main, run_params)

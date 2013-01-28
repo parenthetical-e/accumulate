@@ -1,6 +1,7 @@
 """ Many many models of 2 category accumulation.  Each is a function closure
 that constructs the final model, which should only take one argument: the trial sequence. """
-from math import log, fabs
+from copy import deepcopy
+from math import log, fabs, sqrt
 import numpy as np
 from accumulate.models.deciders import _create_d_result
 from accumulate.models.noise import dummy
@@ -107,8 +108,6 @@ def create_naive_probability(name, threshold, decider):
         A or B in <trial>, decide when p_sequence(A) or (B) exceeds 
         <threshold>. """
         
-        from copy import deepcopy
-
         ## Init
         score_A = 0
         score_B = 0        
@@ -182,8 +181,15 @@ def create_information(name, threshold, decider):
 
 
 # TODO - test me!
-def create_snr(name, threshold, decider):
-    """  Creates a model based on Gardelle et al's mean / SNR model.
+def create_snr(name, threshold, decider, mean_default=False):
+    """  Creates a model based on Gardelle et al's mean / SNR model however
+    it has been modified for this paradigm - means and SDs are calculated
+    online, after each piece of information is delivered.
+    
+    NOTE: As SD is 0 until the first piece of contrary data is experienced,
+    decisions can't be made for all A or all B trials.  This is thought
+    to be an artifact.  To compensate, is set mean_default to True.  In this case
+    when SD is zero, the mean alone is used to update.
     
     Note: This was not the best model in that paper (LLR was) but it was close 
     and in my opinion could be a useful/interesting 'bad model' to approximate 
@@ -201,44 +207,58 @@ def create_snr(name, threshold, decider):
     check_threshold(threshold)
 
     @update_name(name)
+
     def snr(trial):
         """ Gardelle et al's mean / SNR model. """
-
-        cA = 0.0
-        cB = 0.0     
+        
+        # Init
+        l = len(trial)        
+        meanA = 0 
+        meanB = 0
+        M2A = 0  # Second mean (needed for online)
+        M2B = 0
+        score_A = 0.0
+        score_B = 0.0
         for ii, t in enumerate(trial):
             n = ii + 1  ## reindex needed
                         ## so n is the A/B count
             
-            # Update the count (cA or cB)
-            # calculate the mean and var
-            # treating the trial sequence 
-            # as a binomial distibution
-            score_A = 0.0
-            score_B = 0.0
-            if t == 'A':                
-                cA += 1
-                pA = cA / n
-                meanA = cA * pA
-                varA = cA * pA * (1 - pA)
+            # Calculate the mean and sd
+            # using online algortimns outlined
+            # in Donald E. Knuth (1998). The Art of Computer 
+            # Programming, volume 2: Seminumerical Algorithms, 
+            # 3rd edn.
+            x = 1.0 / l 
+            if t == 'A':
+                delta = x - meanA
+                meanA += delta/n
                 
-                # Skip if var is 0 
-                if (varA == 0.00):
-                    continue
-                    
-                score_A = meanA/varA
+                # Can't update if any 
+                # of the denom are 0
+                try:
+                    M2A += delta * (x - meanA)
+                    sdA = sqrt(M2A / (n - 1))
+                    score_A += meanA/sdA
+                except ZeroDivisionError:
+                    if mean_default:
+                        score_A += meanA
+                    else:
+                        pass
             else:
-                cB += 1
-                pB = cB / n
-                meanB = cB * pB
-                varB = cB * pB * (1 - pB)
-                
-                # Skip if var is 0 
-                if (varB == 0.00):
-                    continue
-                    
-                score_B = meanB/varB
+                delta = x - meanB
+                meanB += delta/n
+                try:
+                    M2B += delta * (x - meanB)
+                    sdB = sqrt(M2B / (n - 1))
+                    score_B += meanB/sdB
+                except ZeroDivisionError:
+                    if mean_default:
+                        score_B += meanB
+                    else:
+                        pass
             
+            print("{2} - {3}. score_A: {0}, score_B: {1}".format(
+                score_A, score_B, ii, t))
             # And see if a decision can be made
             decision = decider(score_A, score_B, threshold, n)
             if decision != None:
@@ -441,7 +461,7 @@ def create_incremental_lba(name, threshold, decider, k=0.1, d=0.1):
         """ Use Brown and Heathcote's (2008) LBA model, modified so A/B updates 
         are exclusive rather than simultanous, to make the decision. """
         
-                # Init
+        # Init
         score_A = k
         score_B = k
         for ii, t in enumerate(trial):
@@ -493,41 +513,40 @@ def create_blca(name, threshold, decider, length=10, k=0.1, wi=0.1, leak=0.1, be
         """ Decide using Usher and McClelland's (2001) ballistic leaky
         competing accumulator model. """
 
-        impulse = 1.0 / length  ## Set impulse height to the 
-                                ## maximum possible score
-                                ## is 1 for all trial lengths
-
-        score = 0.0             ## Init at 0
+    	score_A = k
+        score_B = k
+        # impulse = wi * (1.0 / length) 
         for ii, t in enumerate(trial):
+            # As score_A + score_B = 1, if one is 1, the
+            # other must be zero.
             if t == 'A':
-                rho = wi *  impulse
+                score_A += wi * 1 - (k * score_A) - beta * score_B
+                score_B += wi * 0 - (k * score_B) - beta * score_A
             else:
-                rho = -wi * impulse
-
-            score += (2 * rho - 1) - (leak - beta)  ## There is time-step
-                                                    ## in the org equations
-                                                    ## that I am setting to
-                                                    ## 1 as these sims are 
-                                                    ## temporally unit-less, 
-                                                    ## i.e.,
-                                                    ## dt / t = 1
-
-            # Make scores explicit, consistent
-            # with the notation used herein
-            score_A = score
-            score_B = 1 - score_A
-                ## score is equivilant to score_A
-                ## (see rho definition above)
-                ## and B is tied to A
-
+                score_A += wi * 0 - (k * score_A) - beta * score_B
+                score_B += wi * 1 - (k * score_B) - beta * score_A
+            
+            # print("{2} - {3}. score_A: {0}, score_B: {1}".format(
+                # score_A, score_B, ii, t))
+            
+            # Scores must be postive, 
+            # reset if otherwise
+            if score_A < 0:
+                # print("Reset A")
+                score_A = 0
+            elif score_B < 0:
+                score_B = 0
+                # print("Reset B")
+            
             decision = decider(score_A, score_B, threshold, ii+1)
             if decision != None:
+                # print("hit")
                 return decision
-            else:
-                # If threshold is never met,
-                # we end up here...
-                return _create_d_result('N', None, None, None)
-           
+        else:
+            # If threshold is never met,
+            # we end up here...
+            return _create_d_result('N', None, None, None)
+        
     return blcba
 
   

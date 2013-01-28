@@ -3,14 +3,12 @@
 
 ## DEBUG or other issues
 
-* Test: lba, lcba, snr, and gating all compile.  Gating is producing nonsense
-and the rest need testing. I wish I had a good test case.... think on this
-* No params are good yet.
+* Debug blca, get params for it too, and run on Cal (change ncore first).
 
 ## ENHANCE:
 
 * Set it up so that constructed function's names include their params or otherwise store the params in some kind of self documenting way.
-* While Usher and McClelland (2001) showed that it can't scale, it need not here, and so it may be worth including a feed forward inhibtion model too.
+* While Usher and McClelland (2001) showed that it can't scale, it need not here, and so it may be worth including a feed forward inhibition model too.
 * Free 'x' version of lcba.
 * Race, see LaBerge 1962 and Logan 2002
 * Wang (2002) pooled inhibition (based on Bogsacz lineariztion in section 2.8 of the 'Physics of decision' paper.
