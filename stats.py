@@ -3,6 +3,35 @@ A module to calculate aggregate statistics for AccumulationExp() results.
 """
 from collections import defaultdict
 
+def correct_trial(trial, correct_model, model_results):
+    """ 
+    Given a <correct_model>, how accurate are the remaining <model_names>
+    in <model_results> for the given <trial>.
+    """
+    
+    acc = dict()
+    
+    trial_results = model_results[trial]
+    correct_answer = trial_results[correct_model]['decision']
+    
+    for alt_model, result in trial_results.items():
+        # Don't consider the correct_model
+        # when averaging; it is always 1.
+        if alt_model == correct_model:
+            continue
+
+        # This model's name's answer is:
+        answer = result['decision']            
+        if (answer == correct_answer) and (correct_answer != 'N'):
+            acc.update({alt_model : 1})
+        elif (answer == correct_answer) and (correct_answer == 'N'):
+            acc.update({alt_model : -1})
+                ## Correct Ns as -1
+        else:
+            acc.update({alt_model : 0})
+        
+    return acc
+
 
 def correct(correct_model, model_results):
     """ 

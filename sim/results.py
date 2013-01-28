@@ -2,7 +2,7 @@
 
 import csv
 from collections import defaultdict
-from accumulate.stats import correct
+from accumulate.stats import correct_trial
 
 # TODO test
 def combine(results_list):
@@ -53,7 +53,7 @@ def tabulate(filename, trials, model_results, include_acc):
     for trial in all_trials:
         for model in all_models:
             data = model_results[trial][model]
-            row_part_1 = [
+            row = [
                     trial,
                     model,
                     data['decision'],
@@ -66,14 +66,13 @@ def tabulate(filename, trials, model_results, include_acc):
                     max(counts[trial][0], counts[trial][1]),
                     maxspeed_front[trial],
                     maxspeed_back[trial]
-                    ]
+                ]
+            
             if include_acc:
-                acc = correct(model, model_results)
-                for alt_model, acc in acc[trial].items():
-                    row_part_2 = [alt_model, acc]
-                    writer.writerow(row_part_1 + row_part_2)
-            else:
-                writer.writerow(row_part_1)
+                acc = correct_trial(trial, model, model_results)
+                [row.extend([alt_model, acc]) for alt_model, acc in acc.items()]
+
+            writer.writerow(row)
 
     # Clean up            
     fid.close()
