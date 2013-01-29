@@ -70,9 +70,11 @@ def tabulate(filename, trials, model_results, include_acc):
             
             if include_acc:
                 acc = correct_trial(trial, model, model_results)
-                [row.extend([alt_model, acc]) for alt_model, acc in acc.items()]
+                for alt_model, acc in acc.items():
+                    writer.writerow(row + [alt_model, acc])
+            else:
+                writer.writerow(row)
 
-            writer.writerow(row)
 
     # Clean up            
     fid.close()

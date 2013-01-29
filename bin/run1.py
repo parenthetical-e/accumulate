@@ -61,7 +61,7 @@ def main(params):
     
     # --
     # * Linear balistic
-    ds = [0.06, 0.125, 0.25, 0.5]
+    ds = [1.0/l, 1.5/l, 2.0/l]
     for d in ds:
         model_name = "lba_k0_d{0}".format(d)
         models.append(construct.create_incremental_lba(
@@ -69,9 +69,9 @@ def main(params):
     
     # --
     # * Ballistic leaky competing accumulator.
-    wis = [0.06, 0.125, 0.25]
-    leaks = [0.2, 0.2, 0]
-    betas = [0.1, 0, 0.1]
+    wis = [1.0/l, 1.5/l, 2.0/l]
+    leaks = [0, 0.4, 0.1]
+    betas = [0, 0.1, 0.4]
     for wi in wis:
         for leak, beta in zip(leaks, betas):
             model_name = "blca_k0_wi{0}_leak{1}_beta{2}".format(wi, leak, beta)
@@ -103,18 +103,18 @@ if __name__ == "__main__":
     
     run_params = [
         ('l8_051_abs', 8, 0.51, absolute),
-        # ('l8_065_abs', 8, 0.65, absolute),
-        # ('l8_090_abs', 8, 0.90, absolute)
-        # ('l14_051_abs', 14, 0.51, absolute),
-        # ('l14_065_abs', 14, 0.65, absolute),
-        # ('l14_090_abs', 14, 0.90, absolute),
-        # ('l18_051_abs', 18, 0.51, absolute),
-        # ('l18_065_abs', 18, 0.65, absolute),
-        # ('l18_090_abs', 18, 0.90, absolute)
+        ('l8_065_abs', 8, 0.65, absolute),
+        ('l8_090_abs', 8, 0.90, absolute),
+        ('l14_051_abs', 14, 0.51, absolute),
+        ('l14_065_abs', 14, 0.65, absolute),
+        ('l14_090_abs', 14, 0.90, absolute),
+        ('l18_051_abs', 18, 0.51, absolute),
+        ('l18_065_abs', 18, 0.65, absolute),
+        ('l18_090_abs', 18, 0.90, absolute)
     ]
     
     # Cretae a worker Pool and run run_params
     # in parallel across ncore cores
-    ncore = 2  ## TODO set to 9 on Cal
+    ncore = 9
     pool = Pool(processes=ncore)
     pool.map(main, run_params)

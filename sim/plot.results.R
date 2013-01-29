@@ -93,7 +93,7 @@ plot.scores <- function(rt_filename){
         xlim(0,2) + 
         facet_grid(facets=.~facet2, scales="free_y") +
         theme_bw() +
-        opts(strip.text.y = theme_text()) 
+        theme(strip.text.y = element_text(angle=0)) 
             ## Horizanal labels for y facet
     } else if(facet2 == ".") {
         print("Dot at facet2.")
@@ -104,7 +104,7 @@ plot.scores <- function(rt_filename){
         xlim(0,2) + 
         facet_grid(facets=facet1~., scales="free_y") +
         theme_bw() + 
-        opts(strip.text.y = theme_text())
+        theme(strip.text.y = element_text(angle=0))
 
     } else {
         dt[["facet1"]] <- dt[[facet1]]
@@ -114,7 +114,7 @@ plot.scores <- function(rt_filename){
         xlim(0,2) + 
         facet_grid(facets=facet1~facet2, scales="free_y") +
         theme_bw() + 
-        opts(strip.text.y = theme_text())
+        theme(strip.text.y = element_text(angle=0))
     }
 
     # Save the plot (as pdf, via pdf() above)
@@ -142,7 +142,7 @@ plot.scores <- function(rt_filename){
 
     	qplot(rt, data=dt, facets=.~facet2, geom="histogram", binwidth=0.1) +
         theme_bw() + 
-        opts(strip.text.y = theme_text()) 
+        theme(strip.text.y = element_text(angle=0)) 
             ## Horizanal labels for y facet
     } else if(facet2 == ".") {
         print("Dot at facet2.")
@@ -150,7 +150,7 @@ plot.scores <- function(rt_filename){
 
     	qplot(rt, data=dt, facets=facet1~., geom="histogram", binwidth=0.1) +
         theme_bw() + 
-        opts(strip.text.y = theme_text())
+        theme(strip.text.y = element_text(angle=0))
 
     } else {
         dt[["facet1"]] <- dt[[facet1]]
@@ -159,7 +159,7 @@ plot.scores <- function(rt_filename){
     	qplot(rt, data=dt, facets=facet1~facet2, geom="histogram", 
                 binwidth=0.1) +
         theme_bw() + 
-        opts(strip.text.y = theme_text())
+        theme(strip.text.y = element_text(angle=0))
     }
 
     # Save the plot (as pdf, via pdf() above)
@@ -191,7 +191,7 @@ plot.scores <- function(rt_filename){
     	qplot(x=factor(xaxis), y=rt, data=dt, 
                 facets=.~facet2, geom="boxplot") +
         theme_bw() + 
-        opts(strip.text.y = theme_text()) + xlab(x)
+        theme(strip.text.y = element_text(angle=0)) + xlab(x)
             ## Horizanal labels for y facet
     } else if(facet2 == ".") {
         print("Dot at facet2.")
@@ -200,7 +200,7 @@ plot.scores <- function(rt_filename){
     	qplot(x=factor(xaxis), y=rt, data=dt, 
                 facets=facet1~., geom="boxplot") +
         theme_bw() + 
-        opts(strip.text.y = theme_text()) + xlab(x)
+        theme(strip.text.y = element_text(angle=0)) + xlab(x)
     } else {
         dt[["facet1"]] <- dt[[facet1]]
         dt[["facet2"]] <- dt[[facet2]]
@@ -208,7 +208,7 @@ plot.scores <- function(rt_filename){
     	qplot(x=factor(xaxis), y=rt, data=dt, 
                 facets=facet1~facet2, geom="boxplot") +
         theme_bw() + 
-        opts(strip.text.y = theme_text()) + xlab(x)
+        theme(strip.text.y = element_text(angle=0)) + xlab(x)
     }
 
     # Save the plot (as pdf, via pdf() above)
@@ -238,7 +238,7 @@ plot.scores <- function(rt_filename){
 		xlab("Model") +
 		ylim(0,1) + 
 		theme_bw() + 
-		opts(axis.text.x=theme_text(angle=-90, hjust=0))
+		theme(axis.text.x=element_text(angle=-90, hjust=0))
 
 		ggsave(paste("rt_mean", ".pdf", sep=""))
 		dev.off()
@@ -281,7 +281,7 @@ plot.scores <- function(rt_filename){
 
     pdf(width=width, height=height)
     qplot(x=model, y=cby, data=meaned, fill=agreement, geom="tile") + 
-	opts(axis.text.x=theme_text(angle=-90,  hjust=0)) +
+	theme(axis.text.x=element_text(angle=-90,  hjust=0)) +
     ylab(combineby) +
     scale_fill_gradient2(limits=c(0,1))
     
@@ -321,7 +321,7 @@ plot.scores <- function(rt_filename){
     pdf(width=width,height=height)
     qplot(x=model, y=trial, data=meaned, fill=agreement, geom="tile") + 
     ylab(paste("Trials (sorted by ", sortby, ")",sep="")) +
-	opts(axis.text.x=theme_text(angle=-90,  hjust=0)) +
+	theme(axis.text.x=element_text(angle=-90,  hjust=0)) +
     scale_fill_gradient2(limits=c(0,1))
 
     ggsave(paste("acc_sortedagreement_", sortby,"_", hit, ".pdf", sep=""))
@@ -348,8 +348,8 @@ plot.scores <- function(rt_filename){
 		xlab("Model") + 
 		ylim(0,1) + 
 		theme_bw() +
-		opts(axis.text.x=theme_text(angle=-90,  hjust=0)) +
-		geom_hline(aes(yintercept=0.5, color="red"))
+		theme(axis.text.x=element_text(angle=-90,  hjust=0))
+		# geom_hline(aes(yintercept=0.5, color="red"))
 
 		ggsave(paste("acc_mean_",hit, ".pdf", sep=""))
 		dev.off()
