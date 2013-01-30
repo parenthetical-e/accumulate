@@ -9,14 +9,18 @@ def correct_trial(trial, correct_model, model_results):
     in <model_results> for the given <trial>.
     """
     
+    # Will be a list of accuracies in a dict, keyed
+    # by models from model_results
     acc = dict()
     
+    # Get the trial_results and find the correct_answer
+    # based on correct_model
     trial_results = model_results[trial]
     correct_answer = trial_results[correct_model]['decision']
     
     for alt_model, result in trial_results.items():
         # Don't consider the correct_model
-        # when averaging; it is always 1.
+        # when aggregating; it is always 1.
         if alt_model == correct_model:
             continue
 
