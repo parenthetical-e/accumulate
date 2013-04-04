@@ -8,7 +8,7 @@ def correct_trial(trial, correct_model, model_results):
     Given a <correct_model>, how accurate are the remaining <model_names>
     in <model_results> for the given <trial>.  
     
-    Note: Agreement on N outcomes is coded as -1 not 1.
+    Note: accuracy on N outcomes is coded as -1 not 1.
     """
     
     # Will be a list of accuracies in a dict, keyed
@@ -43,6 +43,8 @@ def correct(correct_model, model_results):
     """ 
     Given a <correct_model>, how accurate are the remaining <model_names>
     in <model_results>.
+    
+    Note: accuracy on N outcomes is coded as -1 not 1.
     """
 
     # Count how many times each model was right
