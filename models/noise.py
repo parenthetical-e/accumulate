@@ -1,7 +1,8 @@
 """ Models of noise. Each is a generator. """
+from itertools import repeat
 
 def dummy():
-    """ Add no noise. """
+    """ Returns 0. """
     
-    yield 0
+    return repeat(0.0)
 
